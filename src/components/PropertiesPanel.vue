@@ -62,7 +62,7 @@
         </div>
         
         <!-- Text Properties -->
-        <div v-if="props.selectedWidget && ['label', 'button', 'entry'].includes(props.selectedWidget.type)" class="properties-group">
+        <div v-if="hasTextProperty" class="properties-group">
           <h4>Text</h4>
           <div class="property-row">
             <label>Content</label>
@@ -75,7 +75,7 @@
           <h4>Style</h4>
           <div class="property-row">
             <label>Button Style</label>
-            <select v-model="buttonStyle" @change="updateButtonStyle">
+            <select v-model="props.selectedWidget.props.buttonStyle" @change="updateWidget">
               <option value="default">Default</option>
               <option value="suggested">Suggested Action</option>
               <option value="destructive">Destructive Action</option>
@@ -186,8 +186,13 @@ const widgetTypeName = computed(() => {
   return typeMap[props.selectedWidget.type] || props.selectedWidget.type;
 });
 
-// Button style property (would be linked to actual CSS classes)
-const buttonStyle = ref('default');
+// Check if the widget has a text property
+const hasTextProperty = computed(() => {
+  if (!props.selectedWidget) return false;
+  
+  return ['label', 'button', 'entry', 'checkbox'].includes(props.selectedWidget.type) && 
+    props.selectedWidget.props && 'text' in props.selectedWidget.props;
+});
 
 // Methods
 const updateWidget = () => {
@@ -196,12 +201,6 @@ const updateWidget = () => {
 
 const updateScreen = () => {
   emit('update-screen', props.selectedScreen);
-};
-
-const updateButtonStyle = () => {
-  // Update button style class
-  console.log('Button style updated to:', buttonStyle.value);
-  updateWidget();
 };
 
 const deleteWidget = () => {
@@ -221,13 +220,6 @@ const removeDropdownItem = (index) => {
     updateWidget();
   }
 };
-
-// Set button style based on selected widget
-if (props.selectedWidget?.type === 'button' && props.selectedWidget.props.buttonStyle) {
-  buttonStyle.value = props.selectedWidget.props.buttonStyle;
-} else {
-  buttonStyle.value = 'default';
-}
 </script>
 
 <style scoped>
@@ -251,54 +243,45 @@ if (props.selectedWidget?.type === 'button' && props.selectedWidget.props.button
   justify-content: center;
   color: var(--gray-5);
   text-align: center;
-  padding: 20px;
+  padding: 30px;
 }
 
 .properties-form {
   display: flex;
   flex-direction: column;
-  gap: 15px;
-  margin-bottom: 15px;
+  gap: 24px;
 }
 
 .properties-header {
-  padding-bottom: 10px;
+  margin-bottom: -12px;
 }
 
 .properties-header h3 {
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: 1.1rem;
+  font-weight: 500;
   color: var(--gray-7);
-}
-
-.properties-separator {
-  height: 1px;
-  background-color: var(--gray-3);
-  margin: 10px 0;
 }
 
 .properties-group {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding-bottom: 15px;
+  gap: 8px;
 }
 
 .properties-group h4 {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 600;
   color: var(--gray-6);
-  margin-bottom: 5px;
+  margin-bottom: 2px;
 }
 
 .property-row {
   display: flex;
-  gap: 10px;
-  align-items: center;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .property-row label {
-  min-width: 80px;
   font-size: 0.85rem;
   color: var(--gray-6);
 }
@@ -320,6 +303,8 @@ if (props.selectedWidget?.type === 'button' && props.selectedWidget.props.button
 }
 
 .checkbox-row {
+  flex-direction: row;
+  align-items: center;
   justify-content: space-between;
 }
 
@@ -329,11 +314,13 @@ if (props.selectedWidget?.type === 'button' && props.selectedWidget.props.button
   margin-top: 10px;
 }
 
-.btn-danger:hover {
-  background-color: #c01020;
+.properties-separator {
+  height: 1px;
+  background-color: var(--gray-3);
+  margin: 16px 0;
 }
 
 .properties-actions {
-  padding-top: 10px;
+  margin-top: 12px;
 }
 </style> 

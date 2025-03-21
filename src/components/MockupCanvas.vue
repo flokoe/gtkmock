@@ -10,9 +10,17 @@
           <span>+</span>
         </button>
       </div>
-      <button class="btn btn-primary" @click="addNewScreen">
-        <span>New Screen</span>
-      </button>
+      <div class="toolbar-actions">
+        <button class="btn btn-primary" @click="addNewScreen">
+          <span>New Screen</span>
+        </button>
+        <button class="btn" @click="exportMockupData">
+          <span>Export</span>
+        </button>
+        <button class="btn" @click="importMockupData">
+          <span>Import</span>
+        </button>
+      </div>
     </div>
     
     <div 
@@ -22,7 +30,7 @@
       @click="handleContainerClick"
     >
       <div 
-        v-if="screens.length === 0" 
+        v-if="mockupData.screens.length === 0" 
         class="empty-canvas"
       >
         <p>Drag and drop widgets from the left panel to start designing</p>
@@ -31,10 +39,10 @@
       
       <div class="screens-wrapper" :style="`transform: scale(${zoom}); transform-origin: top left;`">
         <div 
-          v-for="(screen, screenIndex) in screens" 
-          :key="screenIndex"
+          v-for="(screen, screenIndex) in mockupData.screens" 
+          :key="screen.id"
           class="mockup-screen"
-          :class="{ 'active-screen': currentScreenIndex === screenIndex }"
+          :class="{ 'active-screen': mockupData.currentScreenIndex === screenIndex }"
           @click.stop="selectScreen(screenIndex)"
         >
           <div class="screen-header">
@@ -58,8 +66,8 @@
           
           <div class="screen-content" :style="{ width: `${screen.width}px`, height: `${screen.height}px` }">
             <div
-              v-for="(widget, widgetIndex) in screen.widgets"
-              :key="widgetIndex"
+              v-for="widget in screen.widgets"
+              :key="widget.id"
               class="canvas-widget"
               :style="{
                 left: `${widget.x}px`,
@@ -67,8 +75,8 @@
                 width: widget.width ? `${widget.width}px` : 'auto',
                 height: widget.height ? `${widget.height}px` : 'auto'
               }"
-              @click.stop="selectWidget(screenIndex, widgetIndex)"
-              :class="{ 'selected-widget': currentScreenIndex === screenIndex && selectedWidgetIndex === widgetIndex }"
+              @click.stop="selectWidgetById(widget.id)"
+              :class="{ 'selected-widget': mockupData.selectedWidgetId === widget.id }"
             >
               <component 
                 :is="getWidgetComponent(widget.type)" 
@@ -83,7 +91,27 @@
 </template>
 
 <script setup>
-import { ref, computed, defineEmits } from 'vue';
+import { ref, onMounted, defineEmits } from 'vue';
+import { 
+  mockupData, 
+  addScreen, 
+  selectScreen as selectScreenInStore, 
+  getCurrentScreen, 
+  getScreenAt, 
+  removeScreen as removeScreenFromStore, 
+  duplicateScreen as duplicateScreenInStore, 
+  updateScreen,
+  addWidget,
+  selectWidget,
+  getSelectedWidget,
+  updateWidget,
+  deleteWidget,
+  clearSelection,
+  importMockup,
+  exportMockup,
+  initialize
+} from '@/store/mockupStore';
+import { getWidgetComponent } from '@/components/WidgetRegistry';
 
 const emit = defineEmits([
   'select-widget', 
@@ -93,131 +121,90 @@ const emit = defineEmits([
   'update-screen'
 ]);
 
-// Define reactive state
-const screens = ref([]);
-const currentScreenIndex = ref(-1);
-const selectedWidgetIndex = ref(-1);
+// Local state
 const zoom = ref(1);
 
 // Add a new screen
 const addNewScreen = () => {
-  screens.value.push({
-    name: `Screen ${screens.value.length + 1}`,
-    width: 360,
-    height: 640,
-    widgets: []
-  });
-  const screenIndex = screens.value.length - 1;
+  const screenIndex = addScreen();
   selectScreen(screenIndex);
 };
 
 // Select a screen
 const selectScreen = (index) => {
-  currentScreenIndex.value = index;
-  selectedWidgetIndex.value = -1;
-  
-  // Emit screen selection event with screen data
-  emit('select-screen', index, screens.value[index]);
+  const screen = selectScreenInStore(index);
+  if (screen) {
+    // Emit screen selection event with screen data
+    emit('select-screen', index, screen);
+  }
 };
 
 // Remove a screen
 const removeScreen = (index) => {
-  if (screens.value.length > 1) {
-    screens.value.splice(index, 1);
-    if (currentScreenIndex.value >= screens.value.length) {
-      currentScreenIndex.value = screens.value.length - 1;
-    }
-    // Emit selection for the new current screen
-    if (currentScreenIndex.value >= 0) {
-      emit('select-screen', currentScreenIndex.value, screens.value[currentScreenIndex.value]);
-    } else {
-      emit('deselect');
-    }
+  const result = removeScreenFromStore(index);
+  
+  if (result) {
+    // Selected a different screen - emit selection
+    emit('select-screen', mockupData.currentScreenIndex, result);
   } else {
-    screens.value = [];
-    currentScreenIndex.value = -1;
+    // No screens left or invalid index
     emit('deselect');
   }
-  selectedWidgetIndex.value = -1;
 };
 
 // Duplicate a screen
 const duplicateScreen = (index) => {
-  const newScreen = JSON.parse(JSON.stringify(screens.value[index]));
-  newScreen.name = `${newScreen.name}_copy`;
-  screens.value.splice(index + 1, 0, newScreen);
-  selectScreen(index + 1);
+  const newIndex = duplicateScreenInStore(index);
+  if (newIndex >= 0) {
+    selectScreen(newIndex);
+  }
 };
 
-// Select a widget
-const selectWidget = (screenIndex, widgetIndex) => {
-  currentScreenIndex.value = screenIndex;
-  selectedWidgetIndex.value = widgetIndex;
+// Select a widget by ID
+const selectWidgetById = (widgetId) => {
+  const widget = selectWidget(widgetId);
   
-  // Emit widget selection event with widget data
-  emit('select-widget', screenIndex, widgetIndex, screens.value[screenIndex].widgets[widgetIndex]);
+  if (widget) {
+    // Emit widget selection event with widget data
+    emit('select-widget', mockupData.currentScreenIndex, widgetId, widget);
+  }
 };
 
 // Handle clicks on the canvas container (deselect)
 const handleContainerClick = (event) => {
   // Only deselect if clicking directly on the container, not on a screen or widget
   if (event.target.classList.contains('canvas-container')) {
-    currentScreenIndex.value = -1;
-    selectedWidgetIndex.value = -1;
+    clearSelection();
     emit('deselect');
   }
 };
 
-// Methods to update screens and widgets (called from App.vue)
-const updateSelectedScreen = (updatedScreen) => {
-  if (currentScreenIndex.value >= 0 && currentScreenIndex.value < screens.value.length) {
-    // Update the screen properties
-    screens.value[currentScreenIndex.value] = {
-      ...screens.value[currentScreenIndex.value],
-      ...updatedScreen
-    };
-    
-    // Emit update event
-    emit('update-screen', screens.value[currentScreenIndex.value]);
-  }
-};
-
-// Get screen by index (called from App.vue)
-const getScreenAt = (index) => {
-  if (index >= 0 && index < screens.value.length) {
-    return screens.value[index];
-  }
-  return null;
-};
-
+// Update selected widget (called from App.vue)
 const updateSelectedWidget = (updatedWidget) => {
-  if (
-    currentScreenIndex.value >= 0 && 
-    selectedWidgetIndex.value >= 0 && 
-    currentScreenIndex.value < screens.value.length && 
-    selectedWidgetIndex.value < screens.value[currentScreenIndex.value].widgets.length
-  ) {
-    // Update the widget properties
-    screens.value[currentScreenIndex.value].widgets[selectedWidgetIndex.value] = {
-      ...screens.value[currentScreenIndex.value].widgets[selectedWidgetIndex.value],
-      ...updatedWidget
-    };
-    
-    // Emit update event
-    emit('update-widget', screens.value[currentScreenIndex.value].widgets[selectedWidgetIndex.value]);
+  if (mockupData.selectedWidgetId) {
+    const widget = updateWidget(mockupData.selectedWidgetId, updatedWidget);
+    if (widget) {
+      emit('update-widget', widget);
+    }
   }
 };
 
+// Delete selected widget
 const deleteSelectedWidget = () => {
-  if (
-    currentScreenIndex.value >= 0 && 
-    selectedWidgetIndex.value >= 0 && 
-    currentScreenIndex.value < screens.value.length && 
-    selectedWidgetIndex.value < screens.value[currentScreenIndex.value].widgets.length
-  ) {
-    // Remove the widget
-    screens.value[currentScreenIndex.value].widgets.splice(selectedWidgetIndex.value, 1);
-    selectedWidgetIndex.value = -1;
+  if (mockupData.selectedWidgetId) {
+    if (deleteWidget(mockupData.selectedWidgetId)) {
+      emit('deselect');
+    }
+  }
+};
+
+// Update selected screen
+const updateSelectedScreen = (updatedScreen) => {
+  if (mockupData.currentScreenIndex >= 0) {
+    const screen = updateScreen(mockupData.currentScreenIndex, updatedScreen);
+    if (screen) {
+      emit('update-screen', screen);
+    }
   }
 };
 
@@ -236,7 +223,7 @@ const onDragOver = (event) => {
 };
 
 const onDrop = (event) => {
-  if (currentScreenIndex.value === -1) {
+  if (mockupData.currentScreenIndex === -1) {
     addNewScreen();
   }
   
@@ -247,39 +234,54 @@ const onDrop = (event) => {
     const y = (event.clientY - rect.top) / zoom.value;
     
     // Add the widget to the current screen
-    screens.value[currentScreenIndex.value].widgets.push({
-      type: widgetData.type,
-      x,
-      y,
-      width: widgetData.type === 'button' ? 80 : 
-             widgetData.type === 'entry' ? 150 : 
-             null,
-      height: widgetData.type === 'button' ? 30 : 
-              widgetData.type === 'entry' ? 30 : 
-              null,
-      props: { ...widgetData.defaultProps }
-    });
+    const widget = addWidget(
+      mockupData.currentScreenIndex, 
+      widgetData.type, 
+      x, 
+      y, 
+      widgetData.defaultProps
+    );
     
-    // Select the new widget
-    const widgetIndex = screens.value[currentScreenIndex.value].widgets.length - 1;
-    selectWidget(currentScreenIndex.value, widgetIndex);
+    if (widget) {
+      // The new widget is already selected in the store
+      emit('select-widget', mockupData.currentScreenIndex, widget.id, widget);
+    }
   } catch (e) {
     console.error('Error adding widget:', e);
   }
 };
 
-// Helper to get the appropriate component for a widget type
-const getWidgetComponent = (type) => {
-  // This would map to actual components in a real implementation
-  return 'div';
+// Import and export mockup data
+const importMockupData = () => {
+  const jsonData = prompt('Paste JSON mockup data:');
+  if (jsonData) {
+    if (importMockup(jsonData)) {
+      if (mockupData.screens.length > 0) {
+        selectScreen(0);
+      }
+    } else {
+      alert('Invalid mockup data format');
+    }
+  }
+};
+
+const exportMockupData = () => {
+  const jsonData = exportMockup();
+  alert('Copy this JSON data to save your mockup:\n\n' + jsonData);
 };
 
 // Add a default screen when the component is mounted
-setTimeout(() => {
-  if (screens.value.length === 0) {
-    addNewScreen();
-  }
-}, 100);
+onMounted(() => {
+  initialize();
+});
+
+// Expose methods for the parent component
+defineExpose({
+  updateSelectedWidget,
+  updateSelectedScreen,
+  deleteSelectedWidget,
+  getScreenAt
+});
 </script>
 
 <style scoped>
@@ -300,6 +302,11 @@ setTimeout(() => {
   display: flex;
   align-items: center;
   gap: 4px;
+}
+
+.toolbar-actions {
+  display: flex;
+  gap: 8px;
 }
 
 .btn-icon {

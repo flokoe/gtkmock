@@ -49,22 +49,22 @@ import { ref } from 'vue';
 
 const basicWidgets = ref([
   { type: 'label', name: 'Label', icon: 'T', defaultProps: { text: 'Label' } },
-  { type: 'button', name: 'Button', icon: '⬜', defaultProps: { text: 'Button' } },
+  { type: 'button', name: 'Button', icon: '⬜', defaultProps: { text: 'Button', buttonStyle: 'default' } },
   { type: 'image', name: 'Image', icon: '🖼️', defaultProps: { src: '' } },
   { type: 'separator', name: 'Separator', icon: '—', defaultProps: {} },
 ]);
 
 const containerWidgets = ref([
-  { type: 'box', name: 'Box', icon: '📦', defaultProps: { orientation: 'vertical' } },
+  { type: 'box', name: 'Box', icon: '📦', defaultProps: { orientation: 'vertical', spacing: 8 } },
   { type: 'grid', name: 'Grid', icon: '⊞', defaultProps: {} },
-  { type: 'headerbar', name: 'HeaderBar', icon: '▭', defaultProps: {} },
+  { type: 'headerbar', name: 'HeaderBar', icon: '▭', defaultProps: { title: 'Window Title' } },
   { type: 'windowControls', name: 'Window Controls', icon: '🔲', defaultProps: { side: 'start' } },
 ]);
 
 const inputWidgets = ref([
-  { type: 'entry', name: 'Entry', icon: '⌨️', defaultProps: { text: '' } },
+  { type: 'entry', name: 'Entry', icon: '⌨️', defaultProps: { text: '', placeholder: 'Enter text...' } },
   { type: 'spinButton', name: 'Spin Button', icon: '🔢', defaultProps: { value: 0 } },
-  { type: 'checkbox', name: 'Check Button', icon: '☑️', defaultProps: { checked: false } },
+  { type: 'checkbox', name: 'Check Button', icon: '☑️', defaultProps: { checked: false, text: 'Check me' } },
   { type: 'switch', name: 'Switch', icon: '⚙️', defaultProps: { active: false } },
   { type: 'dropdown', name: 'Dropdown', icon: '▼', defaultProps: { items: ['Item 1', 'Item 2'] } },
 ]);
