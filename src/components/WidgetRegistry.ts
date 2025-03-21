@@ -1,6 +1,7 @@
 // Widget Registry - Maps widget types to components
 import { markRaw } from 'vue';
 import { v4 as uuidv4 } from 'uuid';
+import { WidgetMetadata, WidgetDimensions, WidgetRegistry } from '@/types/widget';
 
 // Import widgets and their metadata
 import LabelWidget, { widgetMeta as labelMeta } from './widgets/LabelWidget.vue';
@@ -11,7 +12,7 @@ import SwitchWidget, { widgetMeta as switchMeta } from './widgets/SwitchWidget.v
 import PlaceholderWidget, { placeholderWidgets } from './widgets/PlaceholderWidget.vue';
 
 // Initialize registry with implemented widgets
-const widgetRegistry = {
+const widgetRegistry: WidgetRegistry = {
   // Add implemented widgets with their metadata
   'label': {
     ...labelMeta,
@@ -44,32 +45,32 @@ Object.entries(placeholderWidgets).forEach(([id, meta]) => {
 });
 
 // Get all widgets by category
-export function getWidgetsByCategory(category) {
+export function getWidgetsByCategory(category: string): WidgetMetadata[] {
   return Object.values(widgetRegistry)
     .filter(widget => widget.category === category);
 }
 
 // Get all widgets
-export function getAllWidgets() {
+export function getAllWidgets(): WidgetMetadata[] {
   return Object.values(widgetRegistry);
 }
 
 // Get a component for a given widget type
-export function getWidgetComponent(type) {
+export function getWidgetComponent(type: string) {
   return widgetRegistry[type]?.component || 'div';
 }
 
 // Get widget metadata
-export function getWidgetMetadata(type) {
+export function getWidgetMetadata(type: string): WidgetMetadata | null {
   return widgetRegistry[type] || null;
 }
 
 // Get default dimensions for a widget type
-export function getWidgetDimensions(type) {
+export function getWidgetDimensions(type: string): WidgetDimensions {
   return widgetRegistry[type]?.dimensions || { width: null, height: null };
 }
 
 // Generate a unique ID for a widget instance
-export function generateWidgetId() {
+export function generateWidgetId(): string {
   return uuidv4();
 } 
