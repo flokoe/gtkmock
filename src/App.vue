@@ -79,7 +79,7 @@ body {
 }
 
 .properties-panel {
-  border-left: 1px solid #ddd;
+  /* Border removed */
 }
 
 h1 {

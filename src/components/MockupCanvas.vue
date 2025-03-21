@@ -279,9 +279,6 @@ const getWidgetComponent = (type) => {
   position: relative;
   min-height: 300px;
   background-color: #ffffff;
-  background-image: linear-gradient(#f5f5f5 1px, transparent 1px),
-                    linear-gradient(90deg, #f5f5f5 1px, transparent 1px);
-  background-size: 20px 20px;
 }
 
 .canvas-widget {

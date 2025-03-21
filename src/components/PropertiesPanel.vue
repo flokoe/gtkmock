@@ -214,7 +214,6 @@ setTimeout(() => {
 
 .properties-header {
   padding-bottom: 10px;
-  border-bottom: 1px solid var(--gray-2);
 }
 
 .properties-header h3 {
@@ -226,9 +225,8 @@ setTimeout(() => {
 .properties-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
   padding-bottom: 15px;
-  border-bottom: 1px solid var(--gray-2);
 }
 
 .properties-group h4 {
@@ -256,9 +254,9 @@ setTimeout(() => {
   flex: 1;
   padding: 6px 8px;
   border-radius: 4px;
-  border: 1px solid var(--gray-3);
+  border: none;
   font-size: 0.85rem;
-  background-color: white;
+  background-color: var(--gray-1);
 }
 
 .property-row input[type="checkbox"] {
