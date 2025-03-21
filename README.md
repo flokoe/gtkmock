@@ -1,5 +1,9 @@
 # GTK4/LibAdwaita Mockup Editor
 
+> [!WARNING]
+> Everything in this repository is AI-generated. I’m not a professional software engineer—in fact, I wouldn’t even call myself a programmer.
+> I just know some basics. Please keep that in mind while exploring this repo. Use at your own risk!
+
 An interactive mockup and wireframe editor specifically designed for creating UI prototypes for GTK4 and LibAdwaita applications.
 
 ## Features
