@@ -11,6 +11,18 @@
   </button>
 </template>
 
+<script>
+// Widget metadata for the registry
+export const widgetMeta = {
+  id: 'button',
+  name: 'Button',
+  icon: '⬜',
+  category: 'basic',
+  defaultProps: { text: 'Button', buttonStyle: 'default' },
+  dimensions: { width: 80, height: 30 }
+};
+</script>
+
 <script setup>
 const props = defineProps({
   text: {

@@ -8,6 +8,18 @@
   />
 </template>
 
+<script>
+// Widget metadata for the registry
+export const widgetMeta = {
+  id: 'entry',
+  name: 'Entry',
+  icon: '⌨️',
+  category: 'input',
+  defaultProps: { text: '', placeholder: 'Enter text...' },
+  dimensions: { width: 150, height: 30 }
+};
+</script>
+
 <script setup>
 const props = defineProps({
   text: {

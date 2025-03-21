@@ -1,6 +1,6 @@
 import { reactive, ref } from 'vue';
 import { v4 as uuidv4 } from 'uuid';
-import { getWidgetDimensions } from '@/components/WidgetRegistry';
+import { getWidgetDimensions, getWidgetMetadata } from '@/components/WidgetRegistry';
 
 // The mockup store holds all screens and widgets data
 // This separates the data model from the rendering
@@ -120,8 +120,19 @@ function updateScreen(screenIndex, updates) {
 // Add a widget to a screen
 function addWidget(screenIndex, widgetType, x, y, defaultProps = {}) {
   if (screenIndex >= 0 && screenIndex < mockupData.screens.length) {
-    // Get default dimensions for the widget type
-    const dimensions = getWidgetDimensions(widgetType);
+    // Get widget metadata from registry
+    const widgetMetadata = getWidgetMetadata(widgetType);
+    
+    if (!widgetMetadata) {
+      console.error(`Widget type '${widgetType}' not found in registry`);
+      return null;
+    }
+    
+    // Merge default props from registry with any provided props
+    const mergedProps = {
+      ...widgetMetadata.defaultProps,
+      ...defaultProps
+    };
     
     // Create the widget with a unique ID
     const widget = {
@@ -129,9 +140,9 @@ function addWidget(screenIndex, widgetType, x, y, defaultProps = {}) {
       type: widgetType,
       x,
       y,
-      width: dimensions.width,
-      height: dimensions.height,
-      props: { ...defaultProps }
+      width: widgetMetadata.dimensions.width,
+      height: widgetMetadata.dimensions.height,
+      props: mergedProps
     };
     
     // Add to the screen

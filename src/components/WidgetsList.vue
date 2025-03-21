@@ -20,7 +20,7 @@
       </button>
     </div>
     
-    <div class="widgets-category" v-if="filteredBasicWidgets.length > 0 || !searchQuery">
+    <div class="widgets-category" v-if="filteredWidgetsByCategory('basic').length > 0 || !searchQuery">
       <div 
         class="category-header" 
         @click="toggleCategory('basic')"
@@ -37,8 +37,8 @@
         :class="{ 'collapsed': !categoryState.basic }"
       >
         <div 
-          v-for="widget in filteredBasicWidgets" 
-          :key="widget.type" 
+          v-for="widget in filteredWidgetsByCategory('basic')" 
+          :key="widget.id" 
           class="widget-item draggable"
           draggable="true"
           @dragstart="onDragStart($event, widget)"
@@ -49,7 +49,7 @@
       </div>
     </div>
     
-    <div class="widgets-category" v-if="filteredContainerWidgets.length > 0 || !searchQuery">
+    <div class="widgets-category" v-if="filteredWidgetsByCategory('container').length > 0 || !searchQuery">
       <div 
         class="category-header" 
         @click="toggleCategory('container')"
@@ -66,8 +66,8 @@
         :class="{ 'collapsed': !categoryState.container }"
       >
         <div 
-          v-for="widget in filteredContainerWidgets" 
-          :key="widget.type" 
+          v-for="widget in filteredWidgetsByCategory('container')" 
+          :key="widget.id" 
           class="widget-item draggable"
           draggable="true"
           @dragstart="onDragStart($event, widget)"
@@ -78,7 +78,7 @@
       </div>
     </div>
     
-    <div class="widgets-category" v-if="filteredInputWidgets.length > 0 || !searchQuery">
+    <div class="widgets-category" v-if="filteredWidgetsByCategory('input').length > 0 || !searchQuery">
       <div 
         class="category-header" 
         @click="toggleCategory('input')"
@@ -95,8 +95,8 @@
         :class="{ 'collapsed': !categoryState.input }"
       >
         <div 
-          v-for="widget in filteredInputWidgets" 
-          :key="widget.type" 
+          v-for="widget in filteredWidgetsByCategory('input')" 
+          :key="widget.id" 
           class="widget-item draggable"
           draggable="true"
           @dragstart="onDragStart($event, widget)"
@@ -115,30 +115,9 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue';
+import { getAllWidgets, getWidgetsByCategory } from '@/components/WidgetRegistry';
 
 const searchQuery = ref('');
-
-const basicWidgets = ref([
-  { type: 'label', name: 'Label', icon: 'T', defaultProps: { text: 'Label' } },
-  { type: 'button', name: 'Button', icon: '⬜', defaultProps: { text: 'Button', buttonStyle: 'default' } },
-  { type: 'image', name: 'Image', icon: '🖼️', defaultProps: { src: '' } },
-  { type: 'separator', name: 'Separator', icon: '—', defaultProps: {} },
-]);
-
-const containerWidgets = ref([
-  { type: 'box', name: 'Box', icon: '📦', defaultProps: { orientation: 'vertical', spacing: 8 } },
-  { type: 'grid', name: 'Grid', icon: '⊞', defaultProps: {} },
-  { type: 'headerbar', name: 'HeaderBar', icon: '▭', defaultProps: { title: 'Window Title' } },
-  { type: 'windowControls', name: 'Window Controls', icon: '🔲', defaultProps: { side: 'start' } },
-]);
-
-const inputWidgets = ref([
-  { type: 'entry', name: 'Entry', icon: '⌨️', defaultProps: { text: '', placeholder: 'Enter text...' } },
-  { type: 'spinButton', name: 'Spin Button', icon: '🔢', defaultProps: { value: 0 } },
-  { type: 'checkbox', name: 'Check Button', icon: '☑️', defaultProps: { checked: false, text: 'Check me' } },
-  { type: 'switch', name: 'Switch', icon: '⚙️', defaultProps: { active: false } },
-  { type: 'dropdown', name: 'Dropdown', icon: '▼', defaultProps: { items: ['Item 1', 'Item 2'] } },
-]);
 
 // Track the open/closed state of each category
 const categoryState = ref({
@@ -150,39 +129,27 @@ const categoryState = ref({
 // Original category state before search (to restore when search is cleared)
 const originalCategoryState = ref({});
 
-// Filter widgets based on search query
-const filteredBasicWidgets = computed(() => {
-  if (!searchQuery.value) return basicWidgets.value;
-  return basicWidgets.value.filter(widget => 
+// Filter widgets based on search query for a specific category
+const filteredWidgetsByCategory = (category) => {
+  const widgets = getWidgetsByCategory(category);
+  if (!searchQuery.value) return widgets;
+  
+  return widgets.filter(widget => 
     widget.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-    widget.type.toLowerCase().includes(searchQuery.value.toLowerCase())
+    widget.id.toLowerCase().includes(searchQuery.value.toLowerCase())
   );
-});
-
-const filteredContainerWidgets = computed(() => {
-  if (!searchQuery.value) return containerWidgets.value;
-  return containerWidgets.value.filter(widget => 
-    widget.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-    widget.type.toLowerCase().includes(searchQuery.value.toLowerCase())
-  );
-});
-
-const filteredInputWidgets = computed(() => {
-  if (!searchQuery.value) return inputWidgets.value;
-  return inputWidgets.value.filter(widget => 
-    widget.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-    widget.type.toLowerCase().includes(searchQuery.value.toLowerCase())
-  );
-});
+};
 
 // Check if there are no results for the search
 const noResults = computed(() => {
   if (!searchQuery.value) return false;
-  return (
-    filteredBasicWidgets.value.length === 0 &&
-    filteredContainerWidgets.value.length === 0 &&
-    filteredInputWidgets.value.length === 0
+  
+  const allFilteredWidgets = getAllWidgets().filter(widget =>
+    widget.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+    widget.id.toLowerCase().includes(searchQuery.value.toLowerCase())
   );
+  
+  return allFilteredWidgets.length === 0;
 });
 
 // Watch for changes in search query and expand categories with results
@@ -200,33 +167,34 @@ watch(searchQuery, (newQuery) => {
   
   if (newQuery) {
     // Only expand categories with matches
-    categoryState.value.basic = filteredBasicWidgets.value.length > 0;
-    categoryState.value.container = filteredContainerWidgets.value.length > 0;
-    categoryState.value.input = filteredInputWidgets.value.length > 0;
-  } else if (Object.keys(originalCategoryState.value).length) {
-    // Create a list of categories that had matches
-    const categoriesWithMatches = {
-      basic: filteredBasicWidgets.value.length > 0,
-      container: filteredContainerWidgets.value.length > 0,
-      input: filteredInputWidgets.value.length > 0
-    };
-    
-    // Restore original state for categories without matches
-    Object.keys(originalCategoryState.value).forEach(category => {
-      // If category had matches, keep it expanded, otherwise restore original state
-      if (!categoriesWithMatches[category]) {
-        categoryState.value[category] = originalCategoryState.value[category];
-      }
-    });
-    
-    // Clear the original state after handling
-    originalCategoryState.value = {};
-  }
+    categoryState.value.basic = filteredWidgetsByCategory('basic').length > 0;
+    categoryState.value.container = filteredWidgetsByCategory('container').length > 0;
+    categoryState.value.input = filteredWidgetsByCategory('input').length > 0;
+  } 
 });
 
 // Clear search
 const clearSearch = () => {
+  // Remember which categories had matches before clearing
+  const categoriesWithMatches = {
+    basic: filteredWidgetsByCategory('basic').length > 0,
+    container: filteredWidgetsByCategory('container').length > 0,
+    input: filteredWidgetsByCategory('input').length > 0
+  };
+  
   searchQuery.value = '';
+  
+  // Restore original category state when search is cleared
+  if (Object.keys(originalCategoryState.value).length) {
+    // Restore category states, but keep categories with matches expanded
+    Object.keys(originalCategoryState.value).forEach(category => {
+      // If this category had matches, keep it expanded, otherwise restore original state
+      categoryState.value[category] = categoriesWithMatches[category] ? true : originalCategoryState.value[category];
+    });
+    
+    // Clear the original state after restoring
+    originalCategoryState.value = {};
+  }
 };
 
 // Toggle a category's expanded/collapsed state
@@ -236,7 +204,11 @@ const toggleCategory = (category) => {
 
 const onDragStart = (event, widget) => {
   event.dataTransfer.effectAllowed = 'copy';
-  event.dataTransfer.setData('application/json', JSON.stringify(widget));
+  event.dataTransfer.setData('application/json', JSON.stringify({
+    type: widget.id,
+    defaultProps: widget.defaultProps,
+    dimensions: widget.dimensions
+  }));
 };
 </script>
 
