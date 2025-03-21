@@ -43,6 +43,7 @@
           :key="screen.id"
           class="mockup-screen"
           :class="{ 'active-screen': mockupData.currentScreenIndex === screenIndex }"
+          :data-screen-index="screenIndex"
           @click.stop="selectScreen(screenIndex)"
         >
           <div class="screen-header">
@@ -96,6 +97,7 @@
             class="screen-content"
             :style="{ width: `${screen.width}px`, height: `${screen.height}px` }"
             @dragover.prevent="onDragOver"
+            @dragleave.prevent="onDragLeaveScreen"
             @drop.prevent="event => onDropToScreen(event, screenIndex)"
           >
             <div
@@ -121,7 +123,7 @@
 </template>
 
 <script setup>
-  import { ref, onMounted } from 'vue';
+  import { ref, onMounted, onBeforeUnmount } from 'vue';
   import {
     mockupData,
     addScreen,
@@ -266,10 +268,36 @@
 
   // Drag and drop handlers
   const onDragOver = event => {
+    // Get the screen element that the drag is over (if any)
+    const screenElement = event.target.closest('.mockup-screen');
+
+    if (screenElement) {
+      // Get the index of this screen from the data-index attribute
+      const screenIndex = parseInt(screenElement.getAttribute('data-screen-index'));
+
+      // Clear dragging-widget class from all screens first
+      document.querySelectorAll('.mockup-screen').forEach(screen => {
+        screen.classList.remove('dragging-widget');
+      });
+
+      // Only add dragging-widget class and disallow dropping if this is not the active screen
+      if (screenIndex !== mockupData.currentScreenIndex) {
+        // Add the dragging-widget class only to this screen
+        screenElement.classList.add('dragging-widget');
+        event.dataTransfer.dropEffect = 'none'; // Show "not allowed" cursor
+        return;
+      }
+    }
+
     event.dataTransfer.dropEffect = 'copy';
   };
 
   const onDrop = event => {
+    // Clear any dragging-widget classes on drop
+    document.querySelectorAll('.mockup-screen').forEach(screen => {
+      screen.classList.remove('dragging-widget');
+    });
+
     if (mockupData.currentScreenIndex === -1) {
       addNewScreen();
     }
@@ -301,22 +329,39 @@
   // Handle drop on a specific screen
   const onDropToScreen = (event, screenIndex) => {
     try {
+      // Clear any dragging-widget classes on drop
+      document.querySelectorAll('.mockup-screen').forEach(screen => {
+        screen.classList.remove('dragging-widget');
+      });
+
+      // Only allow drops on the active screen
+      if (mockupData.currentScreenIndex !== screenIndex) {
+        // Prevent dropping on unfocused screens
+        return;
+      }
+
       const widgetData = JSON.parse(event.dataTransfer.getData('application/json'));
       const rect = event.target.getBoundingClientRect();
       const x = (event.clientX - rect.left) / zoom.value;
       const y = (event.clientY - rect.top) / zoom.value;
 
-      // First select the screen where we dropped the widget
-      const screen = selectScreenInStore(screenIndex);
-      if (screen) {
-        emit('select-screen', screenIndex, screen);
+      // First, make sure the target screen exists
+      const targetScreen = getScreenAt(screenIndex);
+      if (!targetScreen) {
+        console.error('Invalid target screen index:', screenIndex);
+        return;
       }
 
-      // Add the widget to the specific screen
+      // Now add the widget directly to the target screen
+      // The updated addWidget function will handle setting the current screen index
       const widget = addWidget(screenIndex, widgetData.type, x, y, widgetData.defaultProps);
 
       if (widget) {
-        // Then select the widget we just dropped
+        // Since the addWidget function updated the current screen,
+        // we need to update the UI to reflect this
+        emit('select-screen', screenIndex, targetScreen);
+
+        // Then select the widget we just added
         emit('select-widget', screenIndex, widget.id, widget);
       }
     } catch (e) {
@@ -343,9 +388,54 @@
     alert('Copy this JSON data to save your mockup:\n\n' + jsonData);
   };
 
-  // Add a default screen when the component is mounted
+  // Add a class to all screens when a drag operation starts (we don't need this anymore)
+  const onDragEnterCanvas = () => {
+    // We'll handle this in the onDragOver function instead
+  };
+
+  // Remove the class when drag operation ends
+  const onDragLeaveCanvas = () => {
+    // Clear any dragging-widget classes
+    document.querySelectorAll('.mockup-screen').forEach(screen => {
+      screen.classList.remove('dragging-widget');
+    });
+  };
+
+  // Handle drag leaving a specific screen
+  const onDragLeaveScreen = event => {
+    // Check if the target is a screen-content div
+    if (event.target.classList.contains('screen-content')) {
+      // Get the parent screen element
+      const screenElement = event.target.closest('.mockup-screen');
+      if (screenElement) {
+        // Remove the dragging-widget class from this screen
+        screenElement.classList.remove('dragging-widget');
+      }
+    }
+  };
+
+  // Setup drag event listeners
   onMounted(() => {
     initialize();
+
+    // Get the canvas container element
+    const canvasContainer = document.querySelector('.canvas-container');
+    if (canvasContainer) {
+      canvasContainer.addEventListener('dragenter', onDragEnterCanvas);
+      canvasContainer.addEventListener('dragleave', onDragLeaveCanvas);
+      canvasContainer.addEventListener('drop', onDragLeaveCanvas);
+    }
+  });
+
+  // Cleanup event listeners on component unmount
+  onBeforeUnmount(() => {
+    // Remove event listeners
+    const canvasContainer = document.querySelector('.canvas-container');
+    if (canvasContainer) {
+      canvasContainer.removeEventListener('dragenter', onDragEnterCanvas);
+      canvasContainer.removeEventListener('dragleave', onDragLeaveCanvas);
+      canvasContainer.removeEventListener('drop', onDragLeaveCanvas);
+    }
   });
 
   // Expose methods for the parent component
@@ -488,5 +578,35 @@
   .selected-widget {
     border: 1px solid var(--blue-3);
     box-shadow: 0 0 0 1px var(--blue-3);
+  }
+
+  /* When dragging is happening, make inactive screens look disabled */
+  .dragging-widget:not(.active-screen) {
+    box-shadow:
+      0 0 0 2px rgba(255, 0, 0, 0.7),
+      0 4px 10px rgba(0, 0, 0, 0.1);
+    cursor: not-allowed;
+    position: relative;
+  }
+
+  /* Simplified instruction text overlay - moved to the mockup-screen element */
+  .dragging-widget:not(.active-screen)::after {
+    content: 'Click on this screen first to activate it';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 500;
+    z-index: 100;
+    pointer-events: none;
+    white-space: nowrap;
+    text-align: center;
+    width: auto;
+    max-width: none;
   }
 </style>

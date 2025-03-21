@@ -132,14 +132,6 @@ function updateScreen(screenIndex: number, updates: Partial<Screen>): Screen | n
 }
 
 // Add a widget to the current screen
-function addWidget(type: string, x?: number, y?: number): Widget | null;
-function addWidget(
-  screenIndex: number,
-  type: string,
-  x: number,
-  y: number,
-  defaultProps?: Record<string, string | number | boolean | string[] | null>
-): Widget | null;
 function addWidget(
   typeOrScreenIndex: string | number,
   xOrType: number | string = 100,
@@ -151,6 +143,7 @@ function addWidget(
   let x: number;
   let y: number;
   let screenToAddTo: Screen | null;
+  let targetScreenIndex: number;
 
   // Handle overload signatures
   if (typeof typeOrScreenIndex === 'string') {
@@ -159,13 +152,14 @@ function addWidget(
     x = xOrType as number;
     y = yOrX || 100;
     screenToAddTo = getCurrentScreen();
+    targetScreenIndex = mockupData.currentScreenIndex;
   } else {
     // Signature 2: addWidget(screenIndex, type, x, y, defaultProps)
-    const screenIndex = typeOrScreenIndex;
+    targetScreenIndex = typeOrScreenIndex;
     type = xOrType as string;
     x = yOrX || 100;
     y = maybeY || 100;
-    screenToAddTo = getScreenAt(screenIndex);
+    screenToAddTo = getScreenAt(targetScreenIndex);
   }
 
   if (!screenToAddTo) return null;
@@ -206,6 +200,11 @@ function addWidget(
   // Add to screen
   screenToAddTo.widgets.push(widget);
 
+  // Make sure we set the current screen index to the target screen before selecting the widget
+  if (mockupData.currentScreenIndex !== targetScreenIndex) {
+    mockupData.currentScreenIndex = targetScreenIndex;
+  }
+
   // Select the new widget
   selectWidget(widget.id);
 
@@ -219,12 +218,27 @@ function selectWidget(id: string | null): Widget | null {
     return null;
   }
 
+  // Store the widget ID
   mockupData.selectedWidgetId = id;
 
+  // First, try to find the widget in the current screen
   if (mockupData.currentScreenIndex >= 0) {
-    const screen = mockupData.screens[mockupData.currentScreenIndex];
+    const currentScreen = mockupData.screens[mockupData.currentScreenIndex];
+    const widget = currentScreen.widgets.find(w => w.id === id);
+    if (widget) {
+      return widget;
+    }
+  }
+
+  // If not found, search in all screens
+  for (let i = 0; i < mockupData.screens.length; i++) {
+    const screen = mockupData.screens[i];
     const widget = screen.widgets.find(w => w.id === id);
-    return widget || null;
+    if (widget) {
+      // If we found the widget in a different screen, update the current screen
+      mockupData.currentScreenIndex = i;
+      return widget;
+    }
   }
 
   return null;
