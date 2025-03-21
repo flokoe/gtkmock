@@ -133,13 +133,19 @@ function updateScreen(screenIndex: number, updates: Partial<Screen>): Screen | n
 
 // Add a widget to the current screen
 function addWidget(type: string, x?: number, y?: number): Widget | null;
-function addWidget(screenIndex: number, type: string, x: number, y: number, defaultProps?: Record<string, any>): Widget | null;
+function addWidget(
+  screenIndex: number,
+  type: string,
+  x: number,
+  y: number,
+  defaultProps?: Record<string, string | number | boolean | string[] | null>
+): Widget | null;
 function addWidget(
   typeOrScreenIndex: string | number,
   xOrType: number | string = 100,
   yOrX?: number,
   maybeY?: number,
-  defaultProps?: Record<string, any>
+  defaultProps?: Record<string, string | number | boolean | string[] | null>
 ): Widget | null {
   let type: string;
   let x: number;

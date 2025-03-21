@@ -161,9 +161,8 @@
     const widgets = getWidgetsByCategory(category);
     if (!searchQuery.value) return widgets;
 
-    return widgets.filter(
-      widget =>
-        widget.displayName.toLowerCase().includes(searchQuery.value.toLowerCase())
+    return widgets.filter(widget =>
+      widget.displayName.toLowerCase().includes(searchQuery.value.toLowerCase())
     );
   };
 
@@ -171,9 +170,8 @@
   const noResults = computed(() => {
     if (!searchQuery.value) return false;
 
-    const allFilteredWidgets = getAllWidgets().filter(
-      widget =>
-        widget.displayName.toLowerCase().includes(searchQuery.value.toLowerCase())
+    const allFilteredWidgets = getAllWidgets().filter(widget =>
+      widget.displayName.toLowerCase().includes(searchQuery.value.toLowerCase())
     );
 
     return allFilteredWidgets.length === 0;
@@ -233,9 +231,9 @@
 
   const onDragStart = (event, widget) => {
     // For widget dragging, we need to use the type (key in the registry)
-    // The key is derived from the displayName converted to lowercase 
+    // The key is derived from the displayName converted to lowercase
     const widgetType = widget.displayName.toLowerCase();
-    
+
     event.dataTransfer.effectAllowed = 'copy';
     event.dataTransfer.setData(
       'application/json',

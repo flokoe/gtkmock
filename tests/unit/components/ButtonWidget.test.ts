@@ -15,8 +15,8 @@ describe('ButtonWidget', () => {
   it('renders with custom text', () => {
     const wrapper = mount(ButtonWidget, {
       props: {
-        text: 'Custom Button'
-      }
+        text: 'Custom Button',
+      },
     });
     expect(wrapper.text()).toBe('Custom Button');
   });
@@ -24,8 +24,8 @@ describe('ButtonWidget', () => {
   it('applies suggested action style', () => {
     const wrapper = mount(ButtonWidget, {
       props: {
-        buttonStyle: 'suggested'
-      }
+        buttonStyle: 'suggested',
+      },
     });
     expect(wrapper.classes()).toContain('suggested-action');
   });
@@ -33,8 +33,8 @@ describe('ButtonWidget', () => {
   it('applies destructive action style', () => {
     const wrapper = mount(ButtonWidget, {
       props: {
-        buttonStyle: 'destructive'
-      }
+        buttonStyle: 'destructive',
+      },
     });
     expect(wrapper.classes()).toContain('destructive-action');
   });
@@ -42,8 +42,8 @@ describe('ButtonWidget', () => {
   it('applies pill button style', () => {
     const wrapper = mount(ButtonWidget, {
       props: {
-        buttonStyle: 'pill'
-      }
+        buttonStyle: 'pill',
+      },
     });
     expect(wrapper.classes()).toContain('pill-button');
   });
@@ -55,4 +55,4 @@ describe('ButtonWidget', () => {
     expect(widgetMeta.name).toBe('Button');
     expect(widgetMeta.category).toBe('basic');
   });
-}); 
+});

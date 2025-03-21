@@ -95,6 +95,8 @@
           <div
             class="screen-content"
             :style="{ width: `${screen.width}px`, height: `${screen.height}px` }"
+            @dragover.prevent="onDragOver"
+            @drop.prevent="event => onDropToScreen(event, screenIndex)"
           >
             <div
               v-for="widget in screen.widgets"
@@ -274,6 +276,28 @@
       }
     } catch (e) {
       console.error('Error adding widget:', e);
+    }
+  };
+
+  // Handle drop on a specific screen
+  const onDropToScreen = (event, screenIndex) => {
+    try {
+      const widgetData = JSON.parse(event.dataTransfer.getData('application/json'));
+      const rect = event.target.getBoundingClientRect();
+      const x = (event.clientX - rect.left) / zoom.value;
+      const y = (event.clientY - rect.top) / zoom.value;
+
+      // Add the widget to the specific screen
+      const widget = addWidget(screenIndex, widgetData.type, x, y, widgetData.defaultProps);
+
+      if (widget) {
+        // Select the screen where we dropped the widget
+        selectScreen(screenIndex);
+        // Select the widget we just dropped
+        emit('select-widget', screenIndex, widget.id, widget);
+      }
+    } catch (e) {
+      console.error('Error adding widget to screen:', e);
     }
   };
 

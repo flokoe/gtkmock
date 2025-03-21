@@ -89,11 +89,19 @@
           <h4>Input Settings</h4>
           <div class="property-row">
             <label>Placeholder</label>
-            <input v-model="localWidget.properties.placeholder" type="text" @change="updateWidget" />
+            <input
+              v-model="localWidget.properties.placeholder"
+              type="text"
+              @change="updateWidget"
+            />
           </div>
           <div class="property-row checkbox-row">
             <label>Password</label>
-            <input v-model="localWidget.properties.password" type="checkbox" @change="updateWidget" />
+            <input
+              v-model="localWidget.properties.password"
+              type="checkbox"
+              @change="updateWidget"
+            />
           </div>
         </div>
 
@@ -105,15 +113,27 @@
           <h4>State</h4>
           <div class="property-row checkbox-row">
             <label>Checked</label>
-            <input v-model="localWidget.properties.checked" type="checkbox" @change="updateWidget" />
+            <input
+              v-model="localWidget.properties.checked"
+              type="checkbox"
+              @change="updateWidget"
+            />
           </div>
         </div>
 
         <!-- Dropdown Properties -->
         <div v-if="localWidget && localWidget.type === 'dropdown'" class="properties-group">
           <h4>Items</h4>
-          <div v-for="(item, index) in localWidget.properties.items" :key="index" class="property-row">
-            <input v-model="localWidget.properties.items[index]" type="text" @change="updateWidget" />
+          <div
+            v-for="(item, index) in localWidget.properties.items"
+            :key="index"
+            class="property-row"
+          >
+            <input
+              v-model="localWidget.properties.items[index]"
+              type="text"
+              @change="updateWidget"
+            />
             <button class="btn-icon" @click="removeDropdownItem(index)">🗑️</button>
           </div>
           <button class="btn btn-sm" @click="addDropdownItem">Add Item</button>
@@ -240,7 +260,9 @@
 
   const addDropdownItem = () => {
     if (localWidget.value?.properties?.items) {
-      localWidget.value.properties.items.push(`Item ${localWidget.value.properties.items.length + 1}`);
+      localWidget.value.properties.items.push(
+        `Item ${localWidget.value.properties.items.length + 1}`
+      );
       updateWidget();
     }
   };
