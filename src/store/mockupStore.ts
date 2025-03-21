@@ -132,9 +132,37 @@ function updateScreen(screenIndex: number, updates: Partial<Screen>): Screen | n
 }
 
 // Add a widget to the current screen
-function addWidget(type: string, x: number = 100, y: number = 100): Widget | null {
-  const currentScreen = getCurrentScreen();
-  if (!currentScreen) return null;
+function addWidget(type: string, x?: number, y?: number): Widget | null;
+function addWidget(screenIndex: number, type: string, x: number, y: number, defaultProps?: Record<string, any>): Widget | null;
+function addWidget(
+  typeOrScreenIndex: string | number,
+  xOrType: number | string = 100,
+  yOrX?: number,
+  maybeY?: number,
+  defaultProps?: Record<string, any>
+): Widget | null {
+  let type: string;
+  let x: number;
+  let y: number;
+  let screenToAddTo: Screen | null;
+
+  // Handle overload signatures
+  if (typeof typeOrScreenIndex === 'string') {
+    // Signature 1: addWidget(type, x, y)
+    type = typeOrScreenIndex;
+    x = xOrType as number;
+    y = yOrX || 100;
+    screenToAddTo = getCurrentScreen();
+  } else {
+    // Signature 2: addWidget(screenIndex, type, x, y, defaultProps)
+    const screenIndex = typeOrScreenIndex;
+    type = xOrType as string;
+    x = yOrX || 100;
+    y = maybeY || 100;
+    screenToAddTo = getScreenAt(screenIndex);
+  }
+
+  if (!screenToAddTo) return null;
 
   // Get metadata for this widget type
   const metadata = getWidgetMetadata(type);
@@ -152,18 +180,25 @@ function addWidget(type: string, x: number = 100, y: number = 100): Widget | nul
     width: dimensions.width || 100,
     height: dimensions.height || 40,
     properties: {},
-    zIndex: currentScreen.widgets.length + 1,
+    zIndex: screenToAddTo.widgets.length + 1,
   };
 
-  // Initialize default properties based on metadata
+  // Apply default properties from metadata
   if (metadata.properties) {
     metadata.properties.forEach(prop => {
       widget.properties[prop.name] = prop.defaultValue;
     });
   }
 
+  // Apply provided default properties (if any)
+  if (defaultProps) {
+    Object.entries(defaultProps).forEach(([key, value]) => {
+      widget.properties[key] = value;
+    });
+  }
+
   // Add to screen
-  currentScreen.widgets.push(widget);
+  screenToAddTo.widgets.push(widget);
 
   // Select the new widget
   selectWidget(widget.id);

@@ -51,13 +51,13 @@
       <div class="category-content" :class="{ collapsed: !categoryState.basic }">
         <div
           v-for="widget in filteredWidgetsByCategory('basic')"
-          :key="widget.id"
+          :key="widget.displayName"
           class="widget-item draggable"
           draggable="true"
           @dragstart="onDragStart($event, widget)"
         >
           <div class="widget-icon">{{ widget.icon }}</div>
-          <div class="widget-name">{{ widget.name }}</div>
+          <div class="widget-name">{{ widget.displayName }}</div>
         </div>
       </div>
     </div>
@@ -87,13 +87,13 @@
       <div class="category-content" :class="{ collapsed: !categoryState.container }">
         <div
           v-for="widget in filteredWidgetsByCategory('container')"
-          :key="widget.id"
+          :key="widget.displayName"
           class="widget-item draggable"
           draggable="true"
           @dragstart="onDragStart($event, widget)"
         >
           <div class="widget-icon">{{ widget.icon }}</div>
-          <div class="widget-name">{{ widget.name }}</div>
+          <div class="widget-name">{{ widget.displayName }}</div>
         </div>
       </div>
     </div>
@@ -123,13 +123,13 @@
       <div class="category-content" :class="{ collapsed: !categoryState.input }">
         <div
           v-for="widget in filteredWidgetsByCategory('input')"
-          :key="widget.id"
+          :key="widget.displayName"
           class="widget-item draggable"
           draggable="true"
           @dragstart="onDragStart($event, widget)"
         >
           <div class="widget-icon">{{ widget.icon }}</div>
-          <div class="widget-name">{{ widget.name }}</div>
+          <div class="widget-name">{{ widget.displayName }}</div>
         </div>
       </div>
     </div>
@@ -163,8 +163,7 @@
 
     return widgets.filter(
       widget =>
-        widget.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-        widget.id.toLowerCase().includes(searchQuery.value.toLowerCase())
+        widget.displayName.toLowerCase().includes(searchQuery.value.toLowerCase())
     );
   };
 
@@ -174,8 +173,7 @@
 
     const allFilteredWidgets = getAllWidgets().filter(
       widget =>
-        widget.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-        widget.id.toLowerCase().includes(searchQuery.value.toLowerCase())
+        widget.displayName.toLowerCase().includes(searchQuery.value.toLowerCase())
     );
 
     return allFilteredWidgets.length === 0;
@@ -234,12 +232,16 @@
   };
 
   const onDragStart = (event, widget) => {
+    // For widget dragging, we need to use the type (key in the registry)
+    // The key is derived from the displayName converted to lowercase 
+    const widgetType = widget.displayName.toLowerCase();
+    
     event.dataTransfer.effectAllowed = 'copy';
     event.dataTransfer.setData(
       'application/json',
       JSON.stringify({
-        type: widget.id,
-        defaultProps: widget.defaultProps,
+        type: widgetType,
+        defaultProps: widget.properties || {}, // Use widget properties if available
         dimensions: widget.dimensions,
       })
     );

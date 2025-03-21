@@ -66,7 +66,7 @@
           <h4>Text</h4>
           <div class="property-row">
             <label>Content</label>
-            <input v-model="localWidget.props.text" type="text" @change="updateWidget" />
+            <input v-model="localWidget.properties.text" type="text" @change="updateWidget" />
           </div>
         </div>
 
@@ -75,7 +75,7 @@
           <h4>Style</h4>
           <div class="property-row">
             <label>Button Style</label>
-            <select v-model="localWidget.props.buttonStyle" @change="updateWidget">
+            <select v-model="localWidget.properties.buttonStyle" @change="updateWidget">
               <option value="default">Default</option>
               <option value="suggested">Suggested Action</option>
               <option value="destructive">Destructive Action</option>
@@ -89,11 +89,11 @@
           <h4>Input Settings</h4>
           <div class="property-row">
             <label>Placeholder</label>
-            <input v-model="localWidget.props.placeholder" type="text" @change="updateWidget" />
+            <input v-model="localWidget.properties.placeholder" type="text" @change="updateWidget" />
           </div>
           <div class="property-row checkbox-row">
             <label>Password</label>
-            <input v-model="localWidget.props.password" type="checkbox" @change="updateWidget" />
+            <input v-model="localWidget.properties.password" type="checkbox" @change="updateWidget" />
           </div>
         </div>
 
@@ -105,15 +105,15 @@
           <h4>State</h4>
           <div class="property-row checkbox-row">
             <label>Checked</label>
-            <input v-model="localWidget.props.checked" type="checkbox" @change="updateWidget" />
+            <input v-model="localWidget.properties.checked" type="checkbox" @change="updateWidget" />
           </div>
         </div>
 
         <!-- Dropdown Properties -->
         <div v-if="localWidget && localWidget.type === 'dropdown'" class="properties-group">
           <h4>Items</h4>
-          <div v-for="(item, index) in localWidget.props.items" :key="index" class="property-row">
-            <input v-model="localWidget.props.items[index]" type="text" @change="updateWidget" />
+          <div v-for="(item, index) in localWidget.properties.items" :key="index" class="property-row">
+            <input v-model="localWidget.properties.items[index]" type="text" @change="updateWidget" />
             <button class="btn-icon" @click="removeDropdownItem(index)">🗑️</button>
           </div>
           <button class="btn btn-sm" @click="addDropdownItem">Add Item</button>
@@ -124,7 +124,7 @@
           <h4>Container</h4>
           <div class="property-row">
             <label>Orientation</label>
-            <select v-model="localWidget.props.orientation" @change="updateWidget">
+            <select v-model="localWidget.properties.orientation" @change="updateWidget">
               <option value="vertical">Vertical</option>
               <option value="horizontal">Horizontal</option>
             </select>
@@ -132,7 +132,7 @@
           <div class="property-row">
             <label>Spacing</label>
             <input
-              v-model.number="localWidget.props.spacing"
+              v-model.number="localWidget.properties.spacing"
               type="number"
               @change="updateWidget"
             />
@@ -220,8 +220,8 @@
 
     return (
       ['label', 'button', 'entry', 'checkbox'].includes(localWidget.value.type) &&
-      localWidget.value.props &&
-      'text' in localWidget.value.props
+      localWidget.value.properties &&
+      'text' in localWidget.value.properties
     );
   });
 
@@ -239,15 +239,15 @@
   };
 
   const addDropdownItem = () => {
-    if (localWidget.value?.props?.items) {
-      localWidget.value.props.items.push(`Item ${localWidget.value.props.items.length + 1}`);
+    if (localWidget.value?.properties?.items) {
+      localWidget.value.properties.items.push(`Item ${localWidget.value.properties.items.length + 1}`);
       updateWidget();
     }
   };
 
   const removeDropdownItem = index => {
-    if (localWidget.value?.props?.items && localWidget.value.props.items.length > 1) {
-      localWidget.value.props.items.splice(index, 1);
+    if (localWidget.value?.properties?.items && localWidget.value.properties.items.length > 1) {
+      localWidget.value.properties.items.splice(index, 1);
       updateWidget();
     }
   };

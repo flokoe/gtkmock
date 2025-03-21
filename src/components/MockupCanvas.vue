@@ -109,7 +109,7 @@
               :class="{ 'selected-widget': mockupData.selectedWidgetId === widget.id }"
               @click.stop="selectWidgetById(widget.id)"
             >
-              <component :is="getWidgetComponent(widget.type)" v-bind="widget.props" />
+              <component :is="getWidgetComponent(widget.type)" v-bind="widget.properties" />
             </div>
           </div>
         </div>

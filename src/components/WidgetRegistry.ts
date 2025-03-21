@@ -67,6 +67,32 @@ const placeholderWidgets: Record<string, WidgetMetadata> = {
     dimensions: { width: null, height: null },
     icon: '?',
   },
+  // Add container widgets
+  box: {
+    displayName: 'Box',
+    category: 'container',
+    description: 'A container for grouping widgets',
+    properties: [],
+    dimensions: { width: 200, height: 150 },
+    icon: '📦',
+  },
+  grid: {
+    displayName: 'Grid',
+    category: 'container',
+    description: 'A grid layout container',
+    properties: [],
+    dimensions: { width: 200, height: 150 },
+    icon: '⊞',
+  },
+  // Add Image widget to basic section
+  image: {
+    displayName: 'Image',
+    category: 'basic',
+    description: 'An image display widget',
+    properties: [],
+    dimensions: { width: 100, height: 100 },
+    icon: '🖼️',
+  },
 };
 
 // Initialize registry with implemented widgets
