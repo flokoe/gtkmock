@@ -25,7 +25,7 @@ export interface MockupStore {
   getScreenAt: (index: number) => Screen | null;
   renameScreen: (index: number, name: string) => void;
   deleteScreen: (index: number) => void;
-  
+
   // Widget operations
   addWidget: (type: string, x?: number, y?: number) => Widget | null;
   selectWidget: (id: string | null) => Widget | null;
@@ -34,9 +34,9 @@ export interface MockupStore {
   updateWidgetSize: (id: string, width: number, height: number) => void;
   updateWidgetProperty: (id: string, propertyName: string, value: any) => void;
   deleteWidget: (id: string) => void;
-  
+
   // Other operations
   resetStore: () => void;
   exportData: () => string;
   importData: (jsonData: string) => boolean;
-} 
+}

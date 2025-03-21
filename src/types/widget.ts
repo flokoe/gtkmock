@@ -44,4 +44,4 @@ export interface Widget {
 // Registry of all available widget types
 export interface WidgetRegistry {
   [key: string]: WidgetMetadata;
-} 
+}

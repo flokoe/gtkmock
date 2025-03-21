@@ -19,13 +19,13 @@ function addScreen(): number {
     name: `Screen ${mockupData.screens.length + 1}`,
     width: 360,
     height: 640,
-    widgets: [] // Array of widget objects with unique IDs
+    widgets: [], // Array of widget objects with unique IDs
   };
-  
+
   mockupData.screens.push(screen);
   const screenIndex = mockupData.screens.length - 1;
   selectScreen(screenIndex);
-  
+
   return screenIndex;
 }
 
@@ -41,7 +41,10 @@ function selectScreen(index: number): Screen | null {
 
 // Get the currently selected screen
 function getCurrentScreen(): Screen | null {
-  if (mockupData.currentScreenIndex >= 0 && mockupData.currentScreenIndex < mockupData.screens.length) {
+  if (
+    mockupData.currentScreenIndex >= 0 &&
+    mockupData.currentScreenIndex < mockupData.screens.length
+  ) {
     return mockupData.screens[mockupData.currentScreenIndex];
   }
   return null;
@@ -59,20 +62,21 @@ function getScreenAt(index: number): Screen | null {
 function removeScreen(index: number): Screen | null {
   if (mockupData.screens.length > 1) {
     mockupData.screens.splice(index, 1);
-    
+
     // Update current screen index if needed
     if (mockupData.currentScreenIndex >= mockupData.screens.length) {
       mockupData.currentScreenIndex = mockupData.screens.length - 1;
     }
-    
-    return mockupData.currentScreenIndex >= 0 ? 
-      mockupData.screens[mockupData.currentScreenIndex] : null;
+
+    return mockupData.currentScreenIndex >= 0
+      ? mockupData.screens[mockupData.currentScreenIndex]
+      : null;
   } else if (mockupData.screens.length === 1) {
     // Don't remove the last screen, just clear it
     mockupData.screens[0].widgets = [];
     return mockupData.screens[0];
   }
-  
+
   return null;
 }
 
@@ -82,21 +86,21 @@ function duplicateScreen(index: number): number {
     // Deep clone the screen and give it a new ID
     const sourceScreen = mockupData.screens[index];
     const newScreen: Screen = JSON.parse(JSON.stringify(sourceScreen));
-    
+
     // Assign new IDs to the duplicated screen and its widgets
     newScreen.id = uuidv4();
     newScreen.name = `${sourceScreen.name}_copy`;
-    
+
     // Give each widget a new ID
     newScreen.widgets.forEach(widget => {
       widget.id = uuidv4();
     });
-    
+
     // Insert after original
     mockupData.screens.splice(index + 1, 0, newScreen);
     return index + 1; // Return the index of the new screen
   }
-  
+
   return -1;
 }
 
@@ -104,17 +108,17 @@ function duplicateScreen(index: number): number {
 function updateScreen(screenIndex: number, updates: Partial<Screen>): Screen | null {
   if (screenIndex >= 0 && screenIndex < mockupData.screens.length) {
     const screen = mockupData.screens[screenIndex];
-    
+
     // Update properties (excluding widgets)
     Object.entries(updates).forEach(([key, value]) => {
       if (key !== 'widgets' && key !== 'id') {
         screen[key] = value;
       }
     });
-    
+
     return screen;
   }
-  
+
   return null;
 }
 
@@ -122,14 +126,14 @@ function updateScreen(screenIndex: number, updates: Partial<Screen>): Screen | n
 function addWidget(type: string, x: number = 100, y: number = 100): Widget | null {
   const currentScreen = getCurrentScreen();
   if (!currentScreen) return null;
-  
+
   // Get metadata for this widget type
   const metadata = getWidgetMetadata(type);
   if (!metadata) return null;
-  
+
   // Get default dimensions
   const dimensions = getWidgetDimensions(type);
-  
+
   // Create the widget with default properties
   const widget: Widget = {
     id: uuidv4(),
@@ -139,35 +143,35 @@ function addWidget(type: string, x: number = 100, y: number = 100): Widget | nul
     width: dimensions.width || 100,
     height: dimensions.height || 40,
     properties: {},
-    zIndex: currentScreen.widgets.length + 1
+    zIndex: currentScreen.widgets.length + 1,
   };
-  
+
   // Initialize default properties based on metadata
   if (metadata.properties) {
     metadata.properties.forEach(prop => {
       widget.properties[prop.name] = prop.defaultValue;
     });
   }
-  
+
   // Add to screen
   currentScreen.widgets.push(widget);
-  
+
   // Select the new widget
   selectWidget(widget.id);
-  
+
   return widget;
 }
 
 // Select a widget by ID
 function selectWidget(widgetId: string): Widget | null {
   mockupData.selectedWidgetId = widgetId;
-  
+
   // Find the widget
   if (mockupData.currentScreenIndex >= 0) {
     const screen = mockupData.screens[mockupData.currentScreenIndex];
     return screen.widgets.find(widget => widget.id === widgetId) || null;
   }
-  
+
   return null;
 }
 
@@ -177,7 +181,7 @@ function getSelectedWidget(): Widget | null {
     const screen = mockupData.screens[mockupData.currentScreenIndex];
     return screen.widgets.find(widget => widget.id === mockupData.selectedWidgetId) || null;
   }
-  
+
   return null;
 }
 
@@ -186,7 +190,7 @@ function updateWidget(widgetId: string, updates: Partial<Widget>): Widget | null
   if (mockupData.currentScreenIndex >= 0) {
     const screen = mockupData.screens[mockupData.currentScreenIndex];
     const widgetIndex = screen.widgets.findIndex(w => w.id === widgetId);
-    
+
     if (widgetIndex >= 0) {
       // Update properties (excluding ID)
       Object.entries(updates).forEach(([key, value]) => {
@@ -195,18 +199,18 @@ function updateWidget(widgetId: string, updates: Partial<Widget>): Widget | null
             // Merge properties objects
             screen.widgets[widgetIndex].properties = {
               ...screen.widgets[widgetIndex].properties,
-              ...value
+              ...value,
             };
           } else {
             screen.widgets[widgetIndex][key] = value;
           }
         }
       });
-      
+
       return screen.widgets[widgetIndex];
     }
   }
-  
+
   return null;
 }
 
@@ -215,14 +219,14 @@ function deleteWidget(widgetId: string): boolean {
   if (mockupData.currentScreenIndex >= 0) {
     const screen = mockupData.screens[mockupData.currentScreenIndex];
     const widgetIndex = screen.widgets.findIndex(w => w.id === widgetId);
-    
+
     if (widgetIndex >= 0) {
       screen.widgets.splice(widgetIndex, 1);
       mockupData.selectedWidgetId = null;
       return true;
     }
   }
-  
+
   return false;
 }
 
@@ -235,7 +239,7 @@ function clearSelection() {
 function importMockup(jsonData: string): boolean {
   try {
     const data = JSON.parse(jsonData);
-    
+
     // Validate basic structure
     if (Array.isArray(data.screens)) {
       mockupData.screens = data.screens;
@@ -246,14 +250,14 @@ function importMockup(jsonData: string): boolean {
   } catch (e) {
     console.error('Failed to import mockup data:', e);
   }
-  
+
   return false;
 }
 
 // Export mockup data to JSON
 function exportMockup(): string {
   return JSON.stringify({
-    screens: mockupData.screens
+    screens: mockupData.screens,
   });
 }
 
@@ -278,7 +282,7 @@ export const useMockupStore = (): MockupStore => {
       }
     },
     deleteScreen: removeScreen,
-    
+
     // Widget operations
     addWidget,
     selectWidget,
@@ -310,22 +314,22 @@ export const useMockupStore = (): MockupStore => {
       return null;
     },
     deleteWidget,
-    
+
     // Other operations
     resetStore: initialize,
     exportData: exportMockup,
-    importData: importMockup
+    importData: importMockup,
   };
-}
+};
 
 // Export these functions directly for direct imports
-export { 
-  addScreen, 
-  selectScreen, 
-  getCurrentScreen, 
-  getScreenAt, 
-  removeScreen, 
-  duplicateScreen, 
+export {
+  addScreen,
+  selectScreen,
+  getCurrentScreen,
+  getScreenAt,
+  removeScreen,
+  duplicateScreen,
   updateScreen,
   addWidget,
   selectWidget,
@@ -336,5 +340,5 @@ export {
   importMockup,
   exportMockup,
   initialize,
-  mockupData
-}; 
+  mockupData,
+};

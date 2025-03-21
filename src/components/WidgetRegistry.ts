@@ -14,25 +14,25 @@ import PlaceholderWidget, { placeholderWidgets } from './widgets/PlaceholderWidg
 // Initialize registry with implemented widgets
 const widgetRegistry: WidgetRegistry = {
   // Add implemented widgets with their metadata
-  'label': {
+  label: {
     ...labelMeta,
-    component: markRaw(LabelWidget)
+    component: markRaw(LabelWidget),
   },
-  'button': {
+  button: {
     ...buttonMeta,
-    component: markRaw(ButtonWidget)
+    component: markRaw(ButtonWidget),
   },
-  'entry': {
+  entry: {
     ...entryMeta,
-    component: markRaw(EntryWidget)
+    component: markRaw(EntryWidget),
   },
-  'checkbox': {
+  checkbox: {
     ...checkboxMeta,
-    component: markRaw(CheckboxWidget)
+    component: markRaw(CheckboxWidget),
   },
-  'switch': {
+  switch: {
     ...switchMeta,
-    component: markRaw(SwitchWidget)
+    component: markRaw(SwitchWidget),
   },
 };
 
@@ -40,14 +40,13 @@ const widgetRegistry: WidgetRegistry = {
 Object.entries(placeholderWidgets).forEach(([id, meta]) => {
   widgetRegistry[id] = {
     ...meta,
-    component: markRaw(PlaceholderWidget)
+    component: markRaw(PlaceholderWidget),
   };
 });
 
 // Get all widgets by category
 export function getWidgetsByCategory(category: string): WidgetMetadata[] {
-  return Object.values(widgetRegistry)
-    .filter(widget => widget.category === category);
+  return Object.values(widgetRegistry).filter(widget => widget.category === category);
 }
 
 // Get all widgets
@@ -73,4 +72,4 @@ export function getWidgetDimensions(type: string): WidgetDimensions {
 // Generate a unique ID for a widget instance
 export function generateWidgetId(): string {
   return uuidv4();
-} 
+}
