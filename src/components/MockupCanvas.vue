@@ -1,10 +1,18 @@
 <template>
   <div class="mockup-canvas">
     <div class="canvas-toolbar">
-      <button class="btn btn-sm" @click="zoomIn">+</button>
-      <span class="zoom-level">{{ Math.round(zoom * 100) }}%</span>
-      <button class="btn btn-sm" @click="zoomOut">-</button>
-      <button class="btn btn-primary" @click="addNewScreen">New Screen</button>
+      <div class="toolbar-group">
+        <button class="btn btn-icon" @click="zoomOut" title="Zoom Out">
+          <span>−</span>
+        </button>
+        <span class="zoom-level">{{ Math.round(zoom * 100) }}%</span>
+        <button class="btn btn-icon" @click="zoomIn" title="Zoom In">
+          <span>+</span>
+        </button>
+      </div>
+      <button class="btn btn-primary" @click="addNewScreen">
+        <span>New Screen</span>
+      </button>
     </div>
     
     <div 
@@ -32,8 +40,19 @@
           <div class="screen-header">
             <span class="screen-name">{{ screen.name }}</span>
             <div class="screen-actions">
-              <button class="btn-icon" @click.stop="duplicateScreen(screenIndex)">📋</button>
-              <button class="btn-icon" @click.stop="removeScreen(screenIndex)">🗑️</button>
+              <button class="btn-icon" @click.stop="duplicateScreen(screenIndex)" title="Duplicate Screen">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="8" y="8" width="12" height="12" rx="2" ry="2"></rect>
+                  <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path>
+                </svg>
+              </button>
+              <button class="btn-icon" @click.stop="removeScreen(screenIndex)" title="Delete Screen">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 6h18"></path>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
+                  <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+              </button>
             </div>
           </div>
           
@@ -272,37 +291,53 @@ setTimeout(() => {
 
 .canvas-toolbar {
   display: flex;
-  gap: 10px;
-  padding: 10px 0;
+  justify-content: space-between;
+  padding: 12px 0;
   align-items: center;
 }
 
-.btn-sm {
-  width: 26px;
-  height: 26px;
+.toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.btn-icon {
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 4px;
+  border-radius: var(--border-radius-md);
   background-color: var(--gray-2);
   color: var(--gray-7);
-  font-weight: bold;
   border: none;
   cursor: pointer;
+  transition: background-color var(--transition-speed);
+}
+
+.btn-icon:hover {
+  background-color: var(--gray-3);
 }
 
 .zoom-level {
   font-size: 0.85rem;
   color: var(--gray-6);
-  width: 45px;
+  width: 48px;
   text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.canvas-container {
+  flex: 1;
+  position: relative;
+  padding-bottom: 60px;
 }
 
 .screens-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  padding-bottom: 20px;
+  gap: 24px;
 }
 
 .empty-canvas {
@@ -314,82 +349,58 @@ setTimeout(() => {
   height: 100%;
   color: var(--gray-5);
   text-align: center;
-  background-color: white;
-  border-radius: 8px;
   padding: 40px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .mockup-screen {
   background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+  border-radius: var(--border-radius-lg);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08), var(--shadow-md);
   display: inline-block;
+  overflow: hidden;
+  transition: box-shadow var(--transition-speed);
 }
 
 .active-screen {
-  box-shadow: 0 0 0 2px var(--blue-2), 0 3px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 0 2px var(--blue-2), 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .screen-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 12px;
+  padding: 10px 12px;
   background-color: var(--gray-1);
   border-bottom: 1px solid var(--gray-2);
 }
 
 .screen-name {
-  font-weight: 600;
+  font-weight: 500;
   font-size: 0.9rem;
   color: var(--gray-7);
 }
 
 .screen-actions {
   display: flex;
-  gap: 5px;
-}
-
-.btn-icon {
-  width: 26px;
-  height: 26px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: none;
-  border: none;
-  cursor: pointer;
-  border-radius: 4px;
-  font-size: 1rem;
-}
-
-.btn-icon:hover {
-  background-color: var(--gray-2);
+  gap: 6px;
 }
 
 .screen-content {
   position: relative;
   min-height: 300px;
-  background-color: #ffffff;
+  background-color: white;
 }
 
 .canvas-widget {
   position: absolute;
-  padding: 2px;
-  border-radius: 3px;
+  border-radius: var(--border-radius-sm);
   background-color: rgba(255, 255, 255, 0.8);
   border: 1px solid var(--gray-3);
+  transition: border var(--transition-speed), box-shadow var(--transition-speed);
 }
 
 .selected-widget {
-  border: 2px solid var(--blue-3);
-  box-shadow: 0 0 0 2px rgba(53, 132, 228, 0.3);
-}
-
-.screen-title {
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: var(--gray-7);
+  border: 1px solid var(--blue-3);
+  box-shadow: 0 0 0 1px var(--blue-3);
 }
 </style> 

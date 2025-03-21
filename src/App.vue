@@ -120,11 +120,13 @@ const handleWidgetDelete = () => {
 }
 
 body {
-  font-family: 'Cantarell', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
     Ubuntu, sans-serif;
   line-height: 1.6;
-  color: #333;
-  background-color: #f5f5f5;
+  color: var(--gray-7);
+  background-color: var;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .app-container {
@@ -134,48 +136,52 @@ body {
 }
 
 .app-header {
-  padding: 1rem;
-  background-color: #3584e4;
+  padding: 0.75rem 1.25rem;
+  background-color: var(--blue-3);
   color: white;
+  box-shadow: var(--shadow-md);
+  position: relative;
+  z-index: 10;
 }
 
 .app-content {
   display: flex;
   flex: 1;
   overflow: hidden;
+  gap: 1px;
+  background-color: var(--gray-2);
 }
 
 .sidebar {
-  width: 250px;
-  padding: 1rem;
-  background-color: #ffffff;
-  border-right: 1px solid #ddd;
+  width: 280px;
+  padding: 1.25rem;
+  background-color: white;
   overflow-y: auto;
 }
 
 .widgets-panel {
-  border-right: 1px solid #ddd;
+  display: flex;
+  flex-direction: column;
 }
 
 .main-area {
   flex: 1;
-  padding: 1rem;
+  padding: 1.25rem;
   overflow-y: auto;
-  background-color: #f5f6f7;
-}
-
-.properties-panel {
-  /* Border removed */
+  background-color: var(--gray-1);
 }
 
 h1 {
-  font-size: 1.5rem;
-  font-weight: 600;
+  font-size: 1.25rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
 }
 
 h2 {
-  font-size: 1.2rem;
-  margin-bottom: 1rem;
-  color: #1c71d8;
+  font-size: 1rem;
+  margin-bottom: 1.25rem;
+  color: var(--gray-7);
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 </style> 
