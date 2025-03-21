@@ -1,0 +1,10 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+Only write, create and reference Typescript or `.ts` files.
+
+Always use strong types.
+
+Never use type `any`.
