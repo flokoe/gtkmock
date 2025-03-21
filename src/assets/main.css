@@ -1,0 +1,62 @@
+/* Global styles */
+:root {
+  /* Adwaita blue colors */
+  --blue-0: #99c1f1;
+  --blue-1: #62a0ea;
+  --blue-2: #3584e4;
+  --blue-3: #1c71d8;
+  --blue-4: #1a5fb4;
+  --blue-5: #1b497e;
+  
+  /* Adwaita green colors */
+  --green-1: #8ff0a4;
+  --green-2: #57e389;
+  --green-3: #33d17a;
+  --green-4: #2ec27e;
+  --green-5: #26a269;
+  
+  /* Adwaita gray colors */
+  --gray-1: #f6f5f4;
+  --gray-2: #deddda;
+  --gray-3: #c0bfbc;
+  --gray-4: #9a9996;
+  --gray-5: #77767b;
+  --gray-6: #5e5c64;
+  --gray-7: #3d3846;
+  --gray-8: #241f31;
+}
+
+/* Utility classes */
+.btn {
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-weight: 600;
+  transition: all 0.2s;
+  cursor: pointer;
+  border: none;
+}
+
+.btn-primary {
+  background-color: var(--blue-3);
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: var(--blue-4);
+}
+
+.card {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 16px;
+}
+
+/* Draggable elements */
+.draggable {
+  cursor: grab;
+}
+
+.draggable:active {
+  cursor: grabbing;
+} 
