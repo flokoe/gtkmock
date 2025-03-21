@@ -38,10 +38,6 @@
           </div>
           
           <div class="screen-content" :style="{ width: `${screen.width}px`, height: `${screen.height}px` }">
-            <div class="screen-title-bar" v-if="screen.title">
-              <h3 class="screen-title">{{ screen.title }}</h3>
-            </div>
-            
             <div
               v-for="(widget, widgetIndex) in screen.widgets"
               :key="widgetIndex"
@@ -88,7 +84,6 @@ const zoom = ref(1);
 const addNewScreen = () => {
   screens.value.push({
     name: `Screen ${screens.value.length + 1}`,
-    title: `New Screen ${screens.value.length + 1}`,
     width: 360,
     height: 640,
     widgets: []
@@ -131,7 +126,6 @@ const removeScreen = (index) => {
 const duplicateScreen = (index) => {
   const newScreen = JSON.parse(JSON.stringify(screens.value[index]));
   newScreen.name = `${newScreen.name}_copy`;
-  newScreen.title = `${newScreen.title} (Copy)`;
   screens.value.splice(index + 1, 0, newScreen);
   selectScreen(index + 1);
 };
@@ -396,21 +390,6 @@ setTimeout(() => {
 .screen-title {
   font-weight: 600;
   font-size: 0.9rem;
-  color: var(--gray-7);
-}
-
-.screen-title-bar {
-  width: 100%;
-  padding: 8px 12px;
-  background-color: var(--gray-1);
-  border-bottom: 1px solid var(--gray-2);
-  text-align: center;
-}
-
-.screen-title-bar h3 {
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 500;
   color: var(--gray-7);
 }
 </style> 

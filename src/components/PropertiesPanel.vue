@@ -17,10 +17,6 @@
             <label>Name</label>
             <input type="text" v-model="props.selectedScreen.name" @change="updateScreen" />
           </div>
-          <div class="property-row">
-            <label>Title</label>
-            <input type="text" v-model="props.selectedScreen.title" @change="updateScreen" />
-          </div>
         </div>
         
         <div class="properties-group">
