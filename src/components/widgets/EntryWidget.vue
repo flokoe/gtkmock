@@ -1,6 +1,5 @@
 <template>
   <input
-    type="text"
     class="gtk-entry"
     :value="props.text"
     :placeholder="props.placeholder"

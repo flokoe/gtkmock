@@ -32,7 +32,7 @@ export interface MockupStore {
   getSelectedWidget: () => Widget | null;
   updateWidgetPosition: (id: string, x: number, y: number) => void;
   updateWidgetSize: (id: string, width: number, height: number) => void;
-  updateWidgetProperty: (id: string, propertyName: string, value: any) => void;
+  updateWidgetProperty: (id: string, propertyName: string, value: unknown) => void;
   deleteWidget: (id: string) => void;
 
   // Other operations

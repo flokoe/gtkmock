@@ -6,7 +6,7 @@
 
     <div v-else class="properties-content">
       <!-- Screen Properties -->
-      <div v-if="props.isScreenSelected" class="properties-form">
+      <div v-if="props.isScreenSelected && localScreen" class="properties-form">
         <div class="properties-header">
           <h3>Screen Properties</h3>
         </div>
@@ -15,7 +15,7 @@
           <h4>General</h4>
           <div class="property-row">
             <label>Name</label>
-            <input v-model="props.selectedScreen.name" type="text" @change="updateScreen" />
+            <input v-model="localScreen.name" type="text" @change="updateScreen" />
           </div>
         </div>
 
@@ -23,19 +23,11 @@
           <h4>Dimensions</h4>
           <div class="property-row">
             <label>Width</label>
-            <input
-              v-model.number="props.selectedScreen.width"
-              type="number"
-              @change="updateScreen"
-            />
+            <input v-model.number="localScreen.width" type="number" @change="updateScreen" />
           </div>
           <div class="property-row">
             <label>Height</label>
-            <input
-              v-model.number="props.selectedScreen.height"
-              type="number"
-              @change="updateScreen"
-            />
+            <input v-model.number="localScreen.height" type="number" @change="updateScreen" />
           </div>
         </div>
       </div>
@@ -44,7 +36,7 @@
       <div v-if="props.isScreenSelected && props.hasSelection" class="properties-separator"></div>
 
       <!-- Widget Properties -->
-      <div v-if="props.hasSelection" class="properties-form">
+      <div v-if="props.hasSelection && localWidget" class="properties-form">
         <div class="properties-header">
           <h3>{{ widgetTypeName }} Properties</h3>
         </div>
@@ -53,27 +45,19 @@
           <h4>Position & Size</h4>
           <div class="property-row">
             <label>X</label>
-            <input v-model.number="props.selectedWidget.x" type="number" @change="updateWidget" />
+            <input v-model.number="localWidget.x" type="number" @change="updateWidget" />
           </div>
           <div class="property-row">
             <label>Y</label>
-            <input v-model.number="props.selectedWidget.y" type="number" @change="updateWidget" />
+            <input v-model.number="localWidget.y" type="number" @change="updateWidget" />
           </div>
           <div class="property-row">
             <label>Width</label>
-            <input
-              v-model.number="props.selectedWidget.width"
-              type="number"
-              @change="updateWidget"
-            />
+            <input v-model.number="localWidget.width" type="number" @change="updateWidget" />
           </div>
           <div class="property-row">
             <label>Height</label>
-            <input
-              v-model.number="props.selectedWidget.height"
-              type="number"
-              @change="updateWidget"
-            />
+            <input v-model.number="localWidget.height" type="number" @change="updateWidget" />
           </div>
         </div>
 
@@ -82,19 +66,16 @@
           <h4>Text</h4>
           <div class="property-row">
             <label>Content</label>
-            <input v-model="props.selectedWidget.props.text" type="text" @change="updateWidget" />
+            <input v-model="localWidget.props.text" type="text" @change="updateWidget" />
           </div>
         </div>
 
         <!-- Button Properties -->
-        <div
-          v-if="props.selectedWidget && props.selectedWidget.type === 'button'"
-          class="properties-group"
-        >
+        <div v-if="localWidget && localWidget.type === 'button'" class="properties-group">
           <h4>Style</h4>
           <div class="property-row">
             <label>Button Style</label>
-            <select v-model="props.selectedWidget.props.buttonStyle" @change="updateWidget">
+            <select v-model="localWidget.props.buttonStyle" @change="updateWidget">
               <option value="default">Default</option>
               <option value="suggested">Suggested Action</option>
               <option value="destructive">Destructive Action</option>
@@ -104,78 +85,46 @@
         </div>
 
         <!-- Entry Properties -->
-        <div
-          v-if="props.selectedWidget && props.selectedWidget.type === 'entry'"
-          class="properties-group"
-        >
+        <div v-if="localWidget && localWidget.type === 'entry'" class="properties-group">
           <h4>Input Settings</h4>
           <div class="property-row">
             <label>Placeholder</label>
-            <input
-              v-model="props.selectedWidget.props.placeholder"
-              type="text"
-              @change="updateWidget"
-            />
+            <input v-model="localWidget.props.placeholder" type="text" @change="updateWidget" />
           </div>
           <div class="property-row checkbox-row">
             <label>Password</label>
-            <input
-              v-model="props.selectedWidget.props.password"
-              type="checkbox"
-              @change="updateWidget"
-            />
+            <input v-model="localWidget.props.password" type="checkbox" @change="updateWidget" />
           </div>
         </div>
 
         <!-- Checkbox Properties -->
         <div
-          v-if="
-            props.selectedWidget &&
-            (props.selectedWidget.type === 'checkbox' || props.selectedWidget.type === 'switch')
-          "
+          v-if="localWidget && (localWidget.type === 'checkbox' || localWidget.type === 'switch')"
           class="properties-group"
         >
           <h4>State</h4>
           <div class="property-row checkbox-row">
             <label>Checked</label>
-            <input
-              v-model="props.selectedWidget.props.checked"
-              type="checkbox"
-              @change="updateWidget"
-            />
+            <input v-model="localWidget.props.checked" type="checkbox" @change="updateWidget" />
           </div>
         </div>
 
         <!-- Dropdown Properties -->
-        <div
-          v-if="props.selectedWidget && props.selectedWidget.type === 'dropdown'"
-          class="properties-group"
-        >
+        <div v-if="localWidget && localWidget.type === 'dropdown'" class="properties-group">
           <h4>Items</h4>
-          <div
-            v-for="(item, index) in props.selectedWidget.props.items"
-            :key="index"
-            class="property-row"
-          >
-            <input
-              v-model="props.selectedWidget.props.items[index]"
-              type="text"
-              @change="updateWidget"
-            />
+          <div v-for="(item, index) in localWidget.props.items" :key="index" class="property-row">
+            <input v-model="localWidget.props.items[index]" type="text" @change="updateWidget" />
             <button class="btn-icon" @click="removeDropdownItem(index)">🗑️</button>
           </div>
           <button class="btn btn-sm" @click="addDropdownItem">Add Item</button>
         </div>
 
         <!-- Box Properties -->
-        <div
-          v-if="props.selectedWidget && props.selectedWidget.type === 'box'"
-          class="properties-group"
-        >
+        <div v-if="localWidget && localWidget.type === 'box'" class="properties-group">
           <h4>Container</h4>
           <div class="property-row">
             <label>Orientation</label>
-            <select v-model="props.selectedWidget.props.orientation" @change="updateWidget">
+            <select v-model="localWidget.props.orientation" @change="updateWidget">
               <option value="vertical">Vertical</option>
               <option value="horizontal">Horizontal</option>
             </select>
@@ -183,7 +132,7 @@
           <div class="property-row">
             <label>Spacing</label>
             <input
-              v-model.number="props.selectedWidget.props.spacing"
+              v-model.number="localWidget.props.spacing"
               type="number"
               @change="updateWidget"
             />
@@ -199,7 +148,7 @@
 </template>
 
 <script setup>
-  import { ref, computed } from 'vue';
+  import { computed, ref, watch } from 'vue';
 
   const props = defineProps({
     hasSelection: {
@@ -222,9 +171,30 @@
 
   const emit = defineEmits(['update-widget', 'update-screen', 'delete-widget']);
 
+  // Local reactive copies of props to avoid direct prop mutation
+  const localWidget = ref(props.selectedWidget ? { ...props.selectedWidget } : null);
+  const localScreen = ref(props.selectedScreen ? { ...props.selectedScreen } : null);
+
+  // Watch for changes in props to update local copies
+  watch(
+    () => props.selectedWidget,
+    newWidget => {
+      localWidget.value = newWidget ? { ...newWidget } : null;
+    },
+    { deep: true }
+  );
+
+  watch(
+    () => props.selectedScreen,
+    newScreen => {
+      localScreen.value = newScreen ? { ...newScreen } : null;
+    },
+    { deep: true }
+  );
+
   // Computed properties
   const widgetTypeName = computed(() => {
-    if (!props.selectedWidget) return '';
+    if (!localWidget.value) return '';
 
     const typeMap = {
       label: 'Label',
@@ -241,27 +211,27 @@
       separator: 'Separator',
     };
 
-    return typeMap[props.selectedWidget.type] || props.selectedWidget.type;
+    return typeMap[localWidget.value.type] || localWidget.value.type;
   });
 
   // Check if the widget has a text property
   const hasTextProperty = computed(() => {
-    if (!props.selectedWidget) return false;
+    if (!localWidget.value) return false;
 
     return (
-      ['label', 'button', 'entry', 'checkbox'].includes(props.selectedWidget.type) &&
-      props.selectedWidget.props &&
-      'text' in props.selectedWidget.props
+      ['label', 'button', 'entry', 'checkbox'].includes(localWidget.value.type) &&
+      localWidget.value.props &&
+      'text' in localWidget.value.props
     );
   });
 
   // Methods
   const updateWidget = () => {
-    emit('update-widget', props.selectedWidget);
+    emit('update-widget', localWidget.value);
   };
 
   const updateScreen = () => {
-    emit('update-screen', props.selectedScreen);
+    emit('update-screen', localScreen.value);
   };
 
   const deleteWidget = () => {
@@ -269,15 +239,15 @@
   };
 
   const addDropdownItem = () => {
-    if (props.selectedWidget?.props?.items) {
-      props.selectedWidget.props.items.push(`Item ${props.selectedWidget.props.items.length + 1}`);
+    if (localWidget.value?.props?.items) {
+      localWidget.value.props.items.push(`Item ${localWidget.value.props.items.length + 1}`);
       updateWidget();
     }
   };
 
   const removeDropdownItem = index => {
-    if (props.selectedWidget?.props?.items && props.selectedWidget.props.items.length > 1) {
-      props.selectedWidget.props.items.splice(index, 1);
+    if (localWidget.value?.props?.items && localWidget.value.props.items.length > 1) {
+      localWidget.value.props.items.splice(index, 1);
       updateWidget();
     }
   };

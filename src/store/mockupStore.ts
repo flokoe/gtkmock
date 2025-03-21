@@ -1,7 +1,8 @@
 import { reactive } from 'vue';
 import { v4 as uuidv4 } from 'uuid';
 import { getWidgetDimensions, getWidgetMetadata } from '@/components/WidgetRegistry';
-import { MockupData, Screen, Widget, MockupStore } from '@/types/mockup';
+import { MockupData, Screen, MockupStore } from '@/types/mockup';
+import { Widget } from '@/types/widget';
 
 // The mockup store holds all screens and widgets data
 // This separates the data model from the rendering
@@ -110,9 +111,17 @@ function updateScreen(screenIndex: number, updates: Partial<Screen>): Screen | n
     const screen = mockupData.screens[screenIndex];
 
     // Update properties (excluding widgets)
+    // Only update valid Screen properties
     Object.entries(updates).forEach(([key, value]) => {
-      if (key !== 'widgets' && key !== 'id') {
-        screen[key] = value;
+      if (key !== 'widgets' && key !== 'id' && key in screen) {
+        // Handle each property separately based on known keys
+        if (key === 'name' && typeof value === 'string') {
+          screen.name = value;
+        } else if (key === 'width' && typeof value === 'number') {
+          screen.width = value;
+        } else if (key === 'height' && typeof value === 'number') {
+          screen.height = value;
+        }
       }
     });
 
@@ -162,14 +171,19 @@ function addWidget(type: string, x: number = 100, y: number = 100): Widget | nul
   return widget;
 }
 
-// Select a widget by ID
-function selectWidget(widgetId: string): Widget | null {
-  mockupData.selectedWidgetId = widgetId;
+// Find a widget by ID
+function selectWidget(id: string | null): Widget | null {
+  if (!id) {
+    mockupData.selectedWidgetId = null;
+    return null;
+  }
 
-  // Find the widget
+  mockupData.selectedWidgetId = id;
+
   if (mockupData.currentScreenIndex >= 0) {
     const screen = mockupData.screens[mockupData.currentScreenIndex];
-    return screen.widgets.find(widget => widget.id === widgetId) || null;
+    const widget = screen.widgets.find(w => w.id === id);
+    return widget || null;
   }
 
   return null;
@@ -199,10 +213,30 @@ function updateWidget(widgetId: string, updates: Partial<Widget>): Widget | null
             // Merge properties objects
             screen.widgets[widgetIndex].properties = {
               ...screen.widgets[widgetIndex].properties,
-              ...value,
+              ...(value as Widget['properties']),
             };
           } else {
-            screen.widgets[widgetIndex][key] = value;
+            // Handle known widget properties with type safety
+            switch (key) {
+              case 'x':
+                screen.widgets[widgetIndex].x = value as number;
+                break;
+              case 'y':
+                screen.widgets[widgetIndex].y = value as number;
+                break;
+              case 'width':
+                screen.widgets[widgetIndex].width = value as number;
+                break;
+              case 'height':
+                screen.widgets[widgetIndex].height = value as number;
+                break;
+              case 'type':
+                screen.widgets[widgetIndex].type = value as string;
+                break;
+              case 'zIndex':
+                screen.widgets[widgetIndex].zIndex = value as number;
+                break;
+            }
           }
         }
       });
@@ -305,13 +339,13 @@ export const useMockupStore = (): MockupStore => {
       }
       return null;
     },
-    updateWidgetProperty: (widgetId: string, propertyName: string, value: any): Widget | null => {
-      const widget = selectWidget(widgetId);
+    updateWidgetProperty: (id: string, propertyName: string, value: unknown): void => {
+      const widget = selectWidget(id);
       if (widget) {
-        widget.properties[propertyName] = value;
-        return updateWidget(widgetId, { properties: widget.properties });
+        // Type assertion to ensure compatibility with Widget properties
+        widget.properties[propertyName] = value as string | number | boolean | string[] | null;
+        updateWidget(id, { properties: widget.properties });
       }
-      return null;
     },
     deleteWidget,
 

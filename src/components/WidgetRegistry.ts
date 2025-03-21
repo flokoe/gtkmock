@@ -3,36 +3,94 @@ import { markRaw } from 'vue';
 import { v4 as uuidv4 } from 'uuid';
 import { WidgetMetadata, WidgetDimensions, WidgetRegistry } from '@/types/widget';
 
-// Import widgets and their metadata
-import LabelWidget, { widgetMeta as labelMeta } from './widgets/LabelWidget.vue';
-import ButtonWidget, { widgetMeta as buttonMeta } from './widgets/ButtonWidget.vue';
-import EntryWidget, { widgetMeta as entryMeta } from './widgets/EntryWidget.vue';
-import CheckboxWidget, { widgetMeta as checkboxMeta } from './widgets/CheckboxWidget.vue';
-import SwitchWidget, { widgetMeta as switchMeta } from './widgets/SwitchWidget.vue';
-import PlaceholderWidget, { placeholderWidgets } from './widgets/PlaceholderWidget.vue';
+// Import widget components
+import LabelWidgetVue from './widgets/LabelWidget.vue';
+import ButtonWidgetVue from './widgets/ButtonWidget.vue';
+import EntryWidgetVue from './widgets/EntryWidget.vue';
+import CheckboxWidgetVue from './widgets/CheckboxWidget.vue';
+import SwitchWidgetVue from './widgets/SwitchWidget.vue';
+import PlaceholderWidgetVue from './widgets/PlaceholderWidget.vue';
+
+// Define widget metadata
+const labelMeta: WidgetMetadata = {
+  displayName: 'Label',
+  category: 'basic',
+  description: 'A simple text label',
+  properties: [],
+  dimensions: { width: null, height: null },
+  icon: 'T',
+};
+
+const buttonMeta: WidgetMetadata = {
+  displayName: 'Button',
+  category: 'basic',
+  description: 'A clickable button',
+  properties: [],
+  dimensions: { width: null, height: null },
+  icon: 'B',
+};
+
+const entryMeta: WidgetMetadata = {
+  displayName: 'Entry',
+  category: 'input',
+  description: 'A text input field',
+  properties: [],
+  dimensions: { width: null, height: null },
+  icon: 'E',
+};
+
+const checkboxMeta: WidgetMetadata = {
+  displayName: 'Checkbox',
+  category: 'input',
+  description: 'A checkbox input',
+  properties: [],
+  dimensions: { width: null, height: null },
+  icon: '☑',
+};
+
+const switchMeta: WidgetMetadata = {
+  displayName: 'Switch',
+  category: 'input',
+  description: 'A toggle switch',
+  properties: [],
+  dimensions: { width: null, height: null },
+  icon: '⇄',
+};
+
+// Define placeholder widgets
+const placeholderWidgets: Record<string, WidgetMetadata> = {
+  placeholder: {
+    displayName: 'Placeholder',
+    category: 'utility',
+    description: 'A placeholder for future widgets',
+    properties: [],
+    dimensions: { width: null, height: null },
+    icon: '?',
+  },
+};
 
 // Initialize registry with implemented widgets
 const widgetRegistry: WidgetRegistry = {
   // Add implemented widgets with their metadata
   label: {
     ...labelMeta,
-    component: markRaw(LabelWidget),
+    component: markRaw(LabelWidgetVue),
   },
   button: {
     ...buttonMeta,
-    component: markRaw(ButtonWidget),
+    component: markRaw(ButtonWidgetVue),
   },
   entry: {
     ...entryMeta,
-    component: markRaw(EntryWidget),
+    component: markRaw(EntryWidgetVue),
   },
   checkbox: {
     ...checkboxMeta,
-    component: markRaw(CheckboxWidget),
+    component: markRaw(CheckboxWidgetVue),
   },
   switch: {
     ...switchMeta,
-    component: markRaw(SwitchWidget),
+    component: markRaw(SwitchWidgetVue),
   },
 };
 
@@ -40,7 +98,7 @@ const widgetRegistry: WidgetRegistry = {
 Object.entries(placeholderWidgets).forEach(([id, meta]) => {
   widgetRegistry[id] = {
     ...meta,
-    component: markRaw(PlaceholderWidget),
+    component: markRaw(PlaceholderWidgetVue),
   };
 });
 

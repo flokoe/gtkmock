@@ -72,7 +72,10 @@
 
 <script setup>
   const props = defineProps({
-    type: String,
+    type: {
+      type: String,
+      default: 'widget',
+    },
   });
 </script>
 

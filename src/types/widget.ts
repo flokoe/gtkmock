@@ -14,7 +14,7 @@ export interface PropertyDefinition {
   name: string;
   label: string;
   type: PropertyType;
-  defaultValue: any;
+  defaultValue: string | number | boolean | string[] | null;
   options?: string[]; // For select type
 }
 
@@ -37,7 +37,7 @@ export interface Widget {
   y: number;
   width: number;
   height: number;
-  properties: Record<string, any>;
+  properties: Record<string, string | number | boolean | string[] | null>;
   zIndex: number;
 }
 
