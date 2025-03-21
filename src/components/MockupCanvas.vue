@@ -190,11 +190,30 @@
 
   // Select a widget by ID
   const selectWidgetById = widgetId => {
-    const widget = selectWidget(widgetId);
+    // First, determine which screen contains this widget
+    const screenIndex = mockupData.screens.findIndex(screen =>
+      screen.widgets.some(widget => widget.id === widgetId)
+    );
 
-    if (widget) {
-      // Emit widget selection event with widget data
-      emit('select-widget', mockupData.currentScreenIndex, widgetId, widget);
+    if (screenIndex !== -1) {
+      // If the screen containing this widget is not the current screen, select it first
+      if (mockupData.currentScreenIndex !== screenIndex) {
+        // Select the screen in the store
+        const screen = selectScreenInStore(screenIndex);
+
+        // Emit screen selection event to update properties panel
+        if (screen) {
+          emit('select-screen', screenIndex, screen);
+        }
+      }
+
+      // Then select the widget
+      const widget = selectWidget(widgetId);
+
+      if (widget) {
+        // Emit widget selection event with widget data
+        emit('select-widget', mockupData.currentScreenIndex, widgetId, widget);
+      }
     }
   };
 
@@ -291,9 +310,13 @@
       const widget = addWidget(screenIndex, widgetData.type, x, y, widgetData.defaultProps);
 
       if (widget) {
-        // Select the screen where we dropped the widget
-        selectScreen(screenIndex);
-        // Select the widget we just dropped
+        // First select the screen where we dropped the widget
+        const screen = selectScreenInStore(screenIndex);
+        if (screen) {
+          emit('select-screen', screenIndex, screen);
+        }
+
+        // Then select the widget we just dropped
         emit('select-widget', screenIndex, widget.id, widget);
       }
     } catch (e) {

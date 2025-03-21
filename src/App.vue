@@ -49,21 +49,13 @@
   const mockupCanvas = ref(null);
 
   // Selection handlers
-  const handleWidgetSelection = (screenIndex, widgetIndex, widget) => {
+  const handleWidgetSelection = (screenIndex, widgetId, widget) => {
     hasWidgetSelection.value = true;
     selectedWidget.value = widget;
 
     // When a widget is selected, also select its parent screen
-    if (!isScreenSelected.value) {
-      if (mockupCanvas.value) {
-        // Get the screen from the canvas component
-        const screen = mockupCanvas.value.getScreenAt(screenIndex);
-        if (screen) {
-          isScreenSelected.value = true;
-          selectedScreen.value = screen;
-        }
-      }
-    }
+    // This is now handled by the MockupCanvas component, which will emit
+    // a separate select-screen event when needed
   };
 
   const handleScreenSelection = (screenIndex, screen) => {
