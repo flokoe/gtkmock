@@ -1,123 +1,176 @@
 <template>
   <div class="properties-panel">
-    <div v-if="!hasSelection" class="no-selection">
-      <p>Select a widget to edit its properties</p>
+    <div v-if="!props.hasSelection && !props.isScreenSelected" class="no-selection">
+      <p>Select a widget or screen to edit its properties</p>
     </div>
     
-    <div v-else class="properties-form">
-      <div class="properties-header">
-        <h3>{{ widgetTypeName }} Properties</h3>
-      </div>
-      
-      <div class="properties-group">
-        <h4>Position & Size</h4>
-        <div class="property-row">
-          <label>X</label>
-          <input type="number" v-model.number="selectedWidget.x" @change="updateWidget" />
+    <div v-else class="properties-content">
+      <!-- Screen Properties -->
+      <div v-if="props.isScreenSelected" class="properties-form">
+        <div class="properties-header">
+          <h3>Screen Properties</h3>
         </div>
-        <div class="property-row">
-          <label>Y</label>
-          <input type="number" v-model.number="selectedWidget.y" @change="updateWidget" />
+        
+        <div class="properties-group">
+          <h4>General</h4>
+          <div class="property-row">
+            <label>Name</label>
+            <input type="text" v-model="props.selectedScreen.name" @change="updateScreen" />
+          </div>
+          <div class="property-row">
+            <label>Title</label>
+            <input type="text" v-model="props.selectedScreen.title" @change="updateScreen" />
+          </div>
         </div>
-        <div class="property-row">
-          <label>Width</label>
-          <input type="number" v-model.number="selectedWidget.width" @change="updateWidget" />
-        </div>
-        <div class="property-row">
-          <label>Height</label>
-          <input type="number" v-model.number="selectedWidget.height" @change="updateWidget" />
-        </div>
-      </div>
-      
-      <!-- Text Properties -->
-      <div v-if="['label', 'button', 'entry'].includes(selectedWidget.type)" class="properties-group">
-        <h4>Text</h4>
-        <div class="property-row">
-          <label>Content</label>
-          <input type="text" v-model="selectedWidget.props.text" @change="updateWidget" />
+        
+        <div class="properties-group">
+          <h4>Dimensions</h4>
+          <div class="property-row">
+            <label>Width</label>
+            <input type="number" v-model.number="props.selectedScreen.width" @change="updateScreen" />
+          </div>
+          <div class="property-row">
+            <label>Height</label>
+            <input type="number" v-model.number="props.selectedScreen.height" @change="updateScreen" />
+          </div>
         </div>
       </div>
       
-      <!-- Button Properties -->
-      <div v-if="selectedWidget.type === 'button'" class="properties-group">
-        <h4>Style</h4>
-        <div class="property-row">
-          <label>Button Style</label>
-          <select v-model="buttonStyle" @change="updateButtonStyle">
-            <option value="default">Default</option>
-            <option value="suggested">Suggested Action</option>
-            <option value="destructive">Destructive Action</option>
-            <option value="pill">Pill Button</option>
-          </select>
-        </div>
-      </div>
+      <!-- Visual separator if both screen and widget are selected -->
+      <div v-if="props.isScreenSelected && props.hasSelection" class="properties-separator"></div>
       
-      <!-- Entry Properties -->
-      <div v-if="selectedWidget.type === 'entry'" class="properties-group">
-        <h4>Input Settings</h4>
-        <div class="property-row">
-          <label>Placeholder</label>
-          <input type="text" v-model="selectedWidget.props.placeholder" @change="updateWidget" />
+      <!-- Widget Properties -->
+      <div v-if="props.hasSelection" class="properties-form">
+        <div class="properties-header">
+          <h3>{{ widgetTypeName }} Properties</h3>
         </div>
-        <div class="property-row checkbox-row">
-          <label>Password</label>
-          <input type="checkbox" v-model="selectedWidget.props.password" @change="updateWidget" />
+        
+        <div class="properties-group">
+          <h4>Position & Size</h4>
+          <div class="property-row">
+            <label>X</label>
+            <input type="number" v-model.number="props.selectedWidget.x" @change="updateWidget" />
+          </div>
+          <div class="property-row">
+            <label>Y</label>
+            <input type="number" v-model.number="props.selectedWidget.y" @change="updateWidget" />
+          </div>
+          <div class="property-row">
+            <label>Width</label>
+            <input type="number" v-model.number="props.selectedWidget.width" @change="updateWidget" />
+          </div>
+          <div class="property-row">
+            <label>Height</label>
+            <input type="number" v-model.number="props.selectedWidget.height" @change="updateWidget" />
+          </div>
         </div>
-      </div>
-      
-      <!-- Checkbox Properties -->
-      <div v-if="selectedWidget.type === 'checkbox' || selectedWidget.type === 'switch'" class="properties-group">
-        <h4>State</h4>
-        <div class="property-row checkbox-row">
-          <label>Checked</label>
-          <input type="checkbox" v-model="selectedWidget.props.checked" @change="updateWidget" />
+        
+        <!-- Text Properties -->
+        <div v-if="props.selectedWidget && ['label', 'button', 'entry'].includes(props.selectedWidget.type)" class="properties-group">
+          <h4>Text</h4>
+          <div class="property-row">
+            <label>Content</label>
+            <input type="text" v-model="props.selectedWidget.props.text" @change="updateWidget" />
+          </div>
         </div>
-      </div>
-      
-      <!-- Dropdown Properties -->
-      <div v-if="selectedWidget.type === 'dropdown'" class="properties-group">
-        <h4>Items</h4>
-        <div v-for="(item, index) in selectedWidget.props.items" :key="index" class="property-row">
-          <input type="text" v-model="selectedWidget.props.items[index]" @change="updateWidget" />
-          <button class="btn-icon" @click="removeDropdownItem(index)">🗑️</button>
+        
+        <!-- Button Properties -->
+        <div v-if="props.selectedWidget && props.selectedWidget.type === 'button'" class="properties-group">
+          <h4>Style</h4>
+          <div class="property-row">
+            <label>Button Style</label>
+            <select v-model="buttonStyle" @change="updateButtonStyle">
+              <option value="default">Default</option>
+              <option value="suggested">Suggested Action</option>
+              <option value="destructive">Destructive Action</option>
+              <option value="pill">Pill Button</option>
+            </select>
+          </div>
         </div>
-        <button class="btn btn-sm" @click="addDropdownItem">Add Item</button>
-      </div>
-      
-      <!-- Box Properties -->
-      <div v-if="selectedWidget.type === 'box'" class="properties-group">
-        <h4>Container</h4>
-        <div class="property-row">
-          <label>Orientation</label>
-          <select v-model="selectedWidget.props.orientation" @change="updateWidget">
-            <option value="vertical">Vertical</option>
-            <option value="horizontal">Horizontal</option>
-          </select>
+        
+        <!-- Entry Properties -->
+        <div v-if="props.selectedWidget && props.selectedWidget.type === 'entry'" class="properties-group">
+          <h4>Input Settings</h4>
+          <div class="property-row">
+            <label>Placeholder</label>
+            <input type="text" v-model="props.selectedWidget.props.placeholder" @change="updateWidget" />
+          </div>
+          <div class="property-row checkbox-row">
+            <label>Password</label>
+            <input type="checkbox" v-model="props.selectedWidget.props.password" @change="updateWidget" />
+          </div>
         </div>
-        <div class="property-row">
-          <label>Spacing</label>
-          <input type="number" v-model.number="selectedWidget.props.spacing" @change="updateWidget" />
+        
+        <!-- Checkbox Properties -->
+        <div v-if="props.selectedWidget && (props.selectedWidget.type === 'checkbox' || props.selectedWidget.type === 'switch')" class="properties-group">
+          <h4>State</h4>
+          <div class="property-row checkbox-row">
+            <label>Checked</label>
+            <input type="checkbox" v-model="props.selectedWidget.props.checked" @change="updateWidget" />
+          </div>
         </div>
-      </div>
-      
-      <div class="properties-actions">
-        <button class="btn btn-danger" @click="deleteWidget">Delete Widget</button>
+        
+        <!-- Dropdown Properties -->
+        <div v-if="props.selectedWidget && props.selectedWidget.type === 'dropdown'" class="properties-group">
+          <h4>Items</h4>
+          <div v-for="(item, index) in props.selectedWidget.props.items" :key="index" class="property-row">
+            <input type="text" v-model="props.selectedWidget.props.items[index]" @change="updateWidget" />
+            <button class="btn-icon" @click="removeDropdownItem(index)">🗑️</button>
+          </div>
+          <button class="btn btn-sm" @click="addDropdownItem">Add Item</button>
+        </div>
+        
+        <!-- Box Properties -->
+        <div v-if="props.selectedWidget && props.selectedWidget.type === 'box'" class="properties-group">
+          <h4>Container</h4>
+          <div class="property-row">
+            <label>Orientation</label>
+            <select v-model="props.selectedWidget.props.orientation" @change="updateWidget">
+              <option value="vertical">Vertical</option>
+              <option value="horizontal">Horizontal</option>
+            </select>
+          </div>
+          <div class="property-row">
+            <label>Spacing</label>
+            <input type="number" v-model.number="props.selectedWidget.props.spacing" @change="updateWidget" />
+          </div>
+        </div>
+        
+        <div class="properties-actions">
+          <button class="btn btn-danger" @click="deleteWidget">Delete Widget</button>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, defineProps, defineEmits } from 'vue';
 
-// These would be provided by the parent component in a real implementation
-// For now, we'll simulate them with empty data
-const hasSelection = ref(false);
-const selectedWidget = ref(null);
+const props = defineProps({
+  hasSelection: {
+    type: Boolean,
+    default: false
+  },
+  selectedWidget: {
+    type: Object,
+    default: null
+  },
+  isScreenSelected: {
+    type: Boolean,
+    default: false
+  },
+  selectedScreen: {
+    type: Object,
+    default: null
+  }
+});
+
+const emit = defineEmits(['update-widget', 'update-screen', 'delete-widget']);
 
 // Computed properties
 const widgetTypeName = computed(() => {
-  if (!selectedWidget.value) return '';
+  if (!props.selectedWidget) return '';
   
   const typeMap = {
     'label': 'Label',
@@ -134,7 +187,7 @@ const widgetTypeName = computed(() => {
     'separator': 'Separator'
   };
   
-  return typeMap[selectedWidget.value.type] || selectedWidget.value.type;
+  return typeMap[props.selectedWidget.type] || props.selectedWidget.type;
 });
 
 // Button style property (would be linked to actual CSS classes)
@@ -142,8 +195,11 @@ const buttonStyle = ref('default');
 
 // Methods
 const updateWidget = () => {
-  // This would update the widget in the parent component
-  console.log('Widget updated:', selectedWidget.value);
+  emit('update-widget', props.selectedWidget);
+};
+
+const updateScreen = () => {
+  emit('update-screen', props.selectedScreen);
 };
 
 const updateButtonStyle = () => {
@@ -153,47 +209,43 @@ const updateButtonStyle = () => {
 };
 
 const deleteWidget = () => {
-  // This would delete the selected widget
-  console.log('Delete widget');
-  hasSelection.value = false;
-  selectedWidget.value = null;
+  emit('delete-widget');
 };
 
 const addDropdownItem = () => {
-  if (selectedWidget.value?.props?.items) {
-    selectedWidget.value.props.items.push(`Item ${selectedWidget.value.props.items.length + 1}`);
+  if (props.selectedWidget?.props?.items) {
+    props.selectedWidget.props.items.push(`Item ${props.selectedWidget.props.items.length + 1}`);
     updateWidget();
   }
 };
 
 const removeDropdownItem = (index) => {
-  if (selectedWidget.value?.props?.items && selectedWidget.value.props.items.length > 1) {
-    selectedWidget.value.props.items.splice(index, 1);
+  if (props.selectedWidget?.props?.items && props.selectedWidget.props.items.length > 1) {
+    props.selectedWidget.props.items.splice(index, 1);
     updateWidget();
   }
 };
 
-// Simulating a selected widget for demonstration purposes
-setTimeout(() => {
-  hasSelection.value = true;
-  selectedWidget.value = {
-    type: 'button',
-    x: 50,
-    y: 100,
-    width: 120,
-    height: 40,
-    props: {
-      text: 'Sample Button'
-    }
-  };
+// Set button style based on selected widget
+if (props.selectedWidget?.type === 'button' && props.selectedWidget.props.buttonStyle) {
+  buttonStyle.value = props.selectedWidget.props.buttonStyle;
+} else {
   buttonStyle.value = 'default';
-}, 1000);
+}
 </script>
 
 <style scoped>
 .properties-panel {
   height: 100%;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.properties-content {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 8px;
 }
 
 .no-selection {
@@ -210,6 +262,7 @@ setTimeout(() => {
   display: flex;
   flex-direction: column;
   gap: 15px;
+  margin-bottom: 15px;
 }
 
 .properties-header {
@@ -220,6 +273,12 @@ setTimeout(() => {
   font-size: 1rem;
   font-weight: 600;
   color: var(--gray-7);
+}
+
+.properties-separator {
+  height: 1px;
+  background-color: var(--gray-3);
+  margin: 10px 0;
 }
 
 .properties-group {
