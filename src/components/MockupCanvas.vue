@@ -11,7 +11,6 @@
       class="canvas-container"
       @dragover.prevent="onDragOver"
       @drop.prevent="onDrop"
-      :style="`transform: scale(${zoom}); transform-origin: top left;`"
     >
       <div 
         v-if="screens.length === 0" 
@@ -21,39 +20,41 @@
         <button class="btn btn-primary" @click="addNewScreen">Add your first screen</button>
       </div>
       
-      <div 
-        v-for="(screen, screenIndex) in screens" 
-        :key="screenIndex"
-        class="mockup-screen"
-        :class="{ 'active-screen': currentScreenIndex === screenIndex }"
-        @click="selectScreen(screenIndex)"
-      >
-        <div class="screen-header">
-          <span class="screen-title">{{ screen.name }}</span>
-          <div class="screen-actions">
-            <button class="btn-icon" @click.stop="duplicateScreen(screenIndex)">📋</button>
-            <button class="btn-icon" @click.stop="removeScreen(screenIndex)">🗑️</button>
+      <div class="screens-wrapper" :style="`transform: scale(${zoom}); transform-origin: top left;`">
+        <div 
+          v-for="(screen, screenIndex) in screens" 
+          :key="screenIndex"
+          class="mockup-screen"
+          :class="{ 'active-screen': currentScreenIndex === screenIndex }"
+          @click="selectScreen(screenIndex)"
+        >
+          <div class="screen-header">
+            <span class="screen-title">{{ screen.name }}</span>
+            <div class="screen-actions">
+              <button class="btn-icon" @click.stop="duplicateScreen(screenIndex)">📋</button>
+              <button class="btn-icon" @click.stop="removeScreen(screenIndex)">🗑️</button>
+            </div>
           </div>
-        </div>
-        
-        <div class="screen-content" :style="{ width: `${screen.width}px`, height: `${screen.height}px` }">
-          <div
-            v-for="(widget, widgetIndex) in screen.widgets"
-            :key="widgetIndex"
-            class="canvas-widget"
-            :style="{
-              left: `${widget.x}px`,
-              top: `${widget.y}px`,
-              width: widget.width ? `${widget.width}px` : 'auto',
-              height: widget.height ? `${widget.height}px` : 'auto'
-            }"
-            @click.stop="selectWidget(screenIndex, widgetIndex)"
-            :class="{ 'selected-widget': currentScreenIndex === screenIndex && selectedWidgetIndex === widgetIndex }"
-          >
-            <component 
-              :is="getWidgetComponent(widget.type)" 
-              v-bind="widget.props" 
-            />
+          
+          <div class="screen-content" :style="{ width: `${screen.width}px`, height: `${screen.height}px` }">
+            <div
+              v-for="(widget, widgetIndex) in screen.widgets"
+              :key="widgetIndex"
+              class="canvas-widget"
+              :style="{
+                left: `${widget.x}px`,
+                top: `${widget.y}px`,
+                width: widget.width ? `${widget.width}px` : 'auto',
+                height: widget.height ? `${widget.height}px` : 'auto'
+              }"
+              @click.stop="selectWidget(screenIndex, widgetIndex)"
+              :class="{ 'selected-widget': currentScreenIndex === screenIndex && selectedWidgetIndex === widgetIndex }"
+            >
+              <component 
+                :is="getWidgetComponent(widget.type)" 
+                v-bind="widget.props" 
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -204,13 +205,11 @@ const getWidgetComponent = (type) => {
   text-align: center;
 }
 
-.canvas-container {
-  flex: 1;
-  background-color: var(--gray-3);
-  overflow: auto;
-  padding: 20px;
-  border-radius: 8px;
-  position: relative;
+.screens-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-bottom: 20px;
 }
 
 .empty-canvas {
@@ -232,8 +231,7 @@ const getWidgetComponent = (type) => {
   background-color: white;
   border-radius: 8px;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
-  overflow: hidden;
+  display: inline-block;
 }
 
 .active-screen {
