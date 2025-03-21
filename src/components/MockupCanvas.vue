@@ -306,16 +306,16 @@
       const x = (event.clientX - rect.left) / zoom.value;
       const y = (event.clientY - rect.top) / zoom.value;
 
+      // First select the screen where we dropped the widget
+      const screen = selectScreenInStore(screenIndex);
+      if (screen) {
+        emit('select-screen', screenIndex, screen);
+      }
+
       // Add the widget to the specific screen
       const widget = addWidget(screenIndex, widgetData.type, x, y, widgetData.defaultProps);
 
       if (widget) {
-        // First select the screen where we dropped the widget
-        const screen = selectScreenInStore(screenIndex);
-        if (screen) {
-          emit('select-screen', screenIndex, screen);
-        }
-
         // Then select the widget we just dropped
         emit('select-widget', screenIndex, widget.id, widget);
       }
